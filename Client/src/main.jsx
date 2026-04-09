@@ -23,7 +23,6 @@ import "./styles/inventarioAdmin.css";
 import "./styles/reservasAdmin.css";
 import "./styles/usuariosAdmin.css";
 
-
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
@@ -31,7 +30,5 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <App />
       </AuthProvider>
     </BrowserRouter>
-  </React.StrictMode>
+  </React.StrictMode>,
 );
-
-

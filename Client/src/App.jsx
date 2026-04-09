@@ -16,37 +16,56 @@ import InventarioAdmin from "./pages/Admin/InventarioAdmin.jsx";
 import ReservasAdmin from "./pages/Admin/ReservasAdmin.jsx";
 import UsuariosAdmin from "./pages/Admin/UsuariosAdmin.jsx";
 
-import { AuthProvider } from "./context/AuthContext.jsx";
 import { AdminRoute } from "./components/AdminRoute.jsx";
 
 function App() {
   return (
-    <AuthProvider>
-      <Routes>
-          
-        <Route path="/" element={<Login/>} />
-        <Route path="/Register" element={<Register/>} />
-        <Route path="/Help" element={<Help />} />
-        <Route path="/Forgot" element={<Forgot />} />
-        <Route path="/Reset" element={<Reset />} />
-        <Route path="/Home" element={<Home/>} />
-        <Route path="/Detalle/:id" element={<Detalle />} />
-        <Route path="/Reservas" element={<ReservasUsuario />} />
-        <Route path="/Prestamos" element={<PrestamosUsuarios />} />
-        <Route path="/Favoritos" element={<Favorites />} />
-        <Route path="/Cuenta" element={<Account />} />
-        <Route path="/Ajustes" element={<Settings />} />
+    <Routes>
+      <Route path="/" element={<Login />} />
+      <Route path="/Register" element={<Register />} />
+      <Route path="/Help" element={<Help />} />
+      <Route path="/Forgot" element={<Forgot />} />
+      <Route path="/Reset" element={<Reset />} />
+      <Route path="/Home" element={<Home />} />
+      <Route path="/Detalle/:id" element={<Detalle />} />
+      <Route path="/Reservas" element={<ReservasUsuario />} />
+      <Route path="/Prestamos" element={<PrestamosUsuarios />} />
+      <Route path="/Favoritos" element={<Favorites />} />
+      <Route path="/Cuenta" element={<Account />} />
+      <Route path="/Ajustes" element={<Settings />} />
 
-        {/* ===== RUTAS ADMIN ===== */}
-        <Route path="/Admin/Inventario" element={<AdminRoute> <InventarioAdmin /> </AdminRoute>} />
-        <Route path="/Admin/Reservas" element={<AdminRoute> <ReservasAdmin /> </AdminRoute>} />
-        <Route path="/Admin/Usuarios" element={<AdminRoute> <UsuariosAdmin /> </AdminRoute>} />
+      {/* ===== RUTAS ADMIN ===== */}
+      <Route
+        path="/Admin/Inventario"
+        element={
+          <AdminRoute>
+            {" "}
+            <InventarioAdmin />{" "}
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/Admin/Reservas"
+        element={
+          <AdminRoute>
+            {" "}
+            <ReservasAdmin />{" "}
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/Admin/Usuarios"
+        element={
+          <AdminRoute>
+            {" "}
+            <UsuariosAdmin />{" "}
+          </AdminRoute>
+        }
+      />
 
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/Home" replace />} />
-
-      </Routes>
-    </AuthProvider>
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to="/Home" replace />} />
+    </Routes>
   );
 }
 
