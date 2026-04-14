@@ -25,6 +25,7 @@ function Detalle() {
   const [showFavToast, setShowFavToast] = useState(false);
   const [favToastMsg, setFavToastMsg] = useState("");
   const [reserveToastMsg, setReserveToastMsg] = useState("");
+  const [reserveToastType, setReserveToastType] = useState("success");
 
   // Obtener detalles del libro y estado de favorito al cargar el componente
   useEffect(() => {
@@ -79,18 +80,18 @@ function Detalle() {
   // Función para manejar la reserva del libro
   const handleReserve = async () => {
     try {
-      const res = createReserva(id);
+      const res = await createReserva(id);
 
+      setReserveToastType("success");
       setShowReserveToast(true);
       setReserveToastMsg(res.message || "Reservado exitosamente");
 
       setBook((prev) => ({
         ...prev,
-        available_quantity: prev.available_quantity - 1,
+        available_quantity: Math.max((prev.available_quantity || 1) - 1, 0),
       }));
-
-      setTimeout(() => setShowReserveToast(false), 3000);
     } catch (error) {
+      setReserveToastType("error");
       setShowReserveToast(true);
       setReserveToastMsg(
         error?.response?.data?.message || "Error creando reserva",
@@ -212,7 +213,13 @@ function Detalle() {
           aria-live="polite"
         >
           <div className="toast-content">
-            <i className="fa-solid fa-circle-check" />
+            <i
+              className={`fa-solid ${
+                reserveToastType === "error"
+                  ? "fa-circle-xmark"
+                  : "fa-circle-check"
+              }`}
+            />
 
             <div>
               <p className="toast-title">Reservado</p>

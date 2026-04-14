@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../../components/sidebar";
 import { useLogoutToast } from "../../hooks/useLogoutToast";
-
 import { getReservas, deleteReserva } from "../../services/reserva.service";
 
 function ReservasUsuario() {
   const { toast, openToast } = useLogoutToast();
+
   const [reservas, setReservas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [toastReserva, setToastReserva] = useState({
@@ -14,14 +14,35 @@ function ReservasUsuario() {
     msg: "",
   });
 
-  // Ocultar reservas canceladas después de 7 días
-  const esCanceladaReciente = (reserva) => {
-    if (reserva.estado !== "cancelada" && reserva.estado !== "expirada")
-      return true;
+  const showToast = (title, msg) => {
+    setToastReserva({ show: true, title, msg });
 
-    const fechaCancelacion = new Date(reserva.fecha_reserva);
+    setTimeout(() => {
+      setToastReserva({ show: false, title: "", msg: "" });
+    }, 3000);
+  };
+
+  // Mostrar canceladas/expiradas solo por 7 días más
+  const esVisibleReciente = (reserva) => {
+    if (!["cancelada", "expirada"].includes(reserva.estado)) {
+      return true;
+    }
+
+    let fechaReferencia = null;
+
+    if (reserva.estado === "cancelada") {
+      fechaReferencia = reserva.cancelled_at;
+    }
+
+    if (reserva.estado === "expirada") {
+      fechaReferencia = reserva.expires_at;
+    }
+
+    if (!fechaReferencia) return true;
+
+    const fecha = new Date(fechaReferencia);
     const ahora = new Date();
-    const diffDias = (ahora - fechaCancelacion) / (1000 * 60 * 60 * 24);
+    const diffDias = (ahora - fecha) / (1000 * 60 * 60 * 24);
 
     return diffDias <= 7;
   };
@@ -32,7 +53,7 @@ function ReservasUsuario() {
       try {
         const data = await getReservas(); // ← faltaba esta línea
         const reservasFiltradas = (data.reservas || []).filter(
-          esCanceladaReciente,
+          esVisibleReciente,
         );
         setReservas(reservasFiltradas);
       } catch (error) {
@@ -46,25 +67,21 @@ function ReservasUsuario() {
     fetchReservas();
   }, []);
 
-  const showToast = (title, msg) => {
-    setToastReserva({ show: true, title, msg });
-    setTimeout(
-      () => setToastReserva({ show: false, title: "", msg: "" }),
-      3000,
-    );
-  };
-
   //Borrar reserva
   const handleCancelar = async (idReserva) => {
     try {
       const res = await deleteReserva(idReserva);
 
+      const ahora = new Date().toISOString();
+
       setReservas((prev) =>
         prev
           .map((r) =>
-            r.id_reserva === idReserva ? { ...r, estado: "cancelada" } : r,
+            r.id_reserva === idReserva
+              ? { ...r, estado: "cancelada", cancelled_at: ahora }
+              : r,
           )
-          .filter(esCanceladaReciente),
+          .filter(esVisibleReciente),
       );
 
       showToast("Reserva", res.message || "Reserva cancelada correctamente");
@@ -85,14 +102,25 @@ function ReservasUsuario() {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
-      // hour: "2-digit",
-      // minute: "2-digit",
     });
   };
 
+  //mapear estado a texto legible
+  const getBadgeText = (estado) => {
+    const map = {
+      activa: "Activa",
+      confirmada: "Confirmada",
+      cancelada: "Cancelada",
+      expirada: "Expirada",
+      prestada: "Prestada",
+    };
+
+    return map[estado] || estado;
+  };
+
   //renderizar estado de reserva en base al caso
-  const renderEstado = (estado, expiresAt) => {
-    switch (estado) {
+  const renderEstado = (reserva) => {
+    switch (reserva.estado) {
       case "activa":
         return (
           <>
@@ -101,41 +129,63 @@ function ReservasUsuario() {
             </p>
             <p className="reserva-row">
               <span className="label">Recoger antes de:</span>{" "}
-              {formatDate(expiresAt)}
+              {formatDate(reserva.expires_at)}
             </p>
           </>
         );
 
       case "confirmada":
         return (
-          <p className="reserva-row">
-            <span className="label">Estado:</span> Confirmada
-          </p>
+          <>
+            <p className="reserva-row">
+              <span className="label">Estado:</span> Confirmada
+            </p>
+            <p className="reserva-row">
+              <span className="label">Confirmada el:</span>{" "}
+              {formatDate(reserva.confirmed_at)}
+            </p>
+          </>
         );
 
       case "cancelada":
         return (
-          <p className="reserva-row">
-            <span className="label">Estado:</span> Cancelada
-          </p>
+          <>
+            <p className="reserva-row">
+              <span className="label">Estado:</span> Cancelada
+            </p>
+            <p className="reserva-row">
+              <span className="label">Cancelada el:</span>{" "}
+              {formatDate(reserva.cancelled_at)}
+            </p>
+          </>
         );
 
       case "expirada":
         return (
-          <p className="reserva-row">
-            <span className="label">Estado:</span> Expirada
-          </p>
+          <>
+            <p className="reserva-row">
+              <span className="label">Estado:</span> Expirada
+            </p>
+            <p className="reserva-row">
+              <span className="label">Venció el:</span>{" "}
+              {formatDate(reserva.expires_at)}
+            </p>
+          </>
         );
 
       case "prestada":
         return (
           <p className="reserva-row">
-            <span className="label">Estado:</span> Prestamo
+            <span className="label">Estado:</span> Prestada
           </p>
         );
 
       default:
-        return null;
+        return (
+          <p className="reserva-row">
+            <span className="label">Estado:</span> {reserva.estado}
+          </p>
+        );
     }
   };
 
@@ -183,11 +233,11 @@ function ReservasUsuario() {
                       </h3>
 
                       <p className="reserva-row">
-                        <span className="label">Reservado:</span>{" "}
+                        <span className="label">Reservado el:</span>{" "}
                         {formatDate(reserva.fecha_reserva)}
                       </p>
 
-                      {renderEstado(reserva.estado, reserva.expires_at)}
+                      {renderEstado(reserva)}
                     </div>
 
                     <div className="reserva-footer">
@@ -203,7 +253,7 @@ function ReservasUsuario() {
                         <span
                           className={`badge-estado badge-${reserva.estado}`}
                         >
-                          {reserva.estado}
+                          {getBadgeText(reserva.estado)}
                         </span>
                       )}
                     </div>
@@ -220,7 +270,11 @@ function ReservasUsuario() {
           >
             <div className="toast-content">
               <i
-                className={`fa-solid ${toastReserva.title === "Error" ? "fa-circle-xmark" : "fa-circle-check"}`}
+                className={`fa-solid ${
+                  toastReserva.title === "Error"
+                    ? "fa-circle-xmark"
+                    : "fa-circle-check"
+                }`}
               />
               <div>
                 <p className="toast-title">{toastReserva.title}</p>
