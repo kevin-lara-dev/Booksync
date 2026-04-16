@@ -82,6 +82,81 @@ class ReservaController {
         .json({ message: "Error cancelando reserva", error: msg });
     }
   }
+
+  // =========================
+  // ADMIN
+  // =========================
+
+  //listar todas las reservas admin
+  static async admminList(req, res) {
+    try {
+      const rows = await Reserva.listAllReservasAdmin();
+      return res.json({ reservas: rows });
+    } catch (error) {
+      return res.status(500).json({
+        message: "Error listando reservas admin",
+        error: error.message,
+      });
+    }
+  }
+
+  //confirmar Reservas Admin
+  static async adminConfirm(req, res) {
+    try {
+      const idReserva = Number(req.params.idReserva);
+      if (!Number.isInteger(idReserva) || idReserva <= 0) {
+        return res.status(400).json({ message: "idReserva invalido" });
+      }
+
+      const result = await Reserva.confirmReservaAdmin(idReserva);
+      return res.json(result);
+    } catch (error) {
+      const msg = error.message || "Error confirmando reserva";
+      if (msg.includes("Reserva no encontrada")) {
+        return res.status(404).json({ message: msg });
+      }
+
+      if (msg.includes("Solo reservas activas")) {
+        return res.status(409).json({ message: msg });
+      }
+
+      if (msg.includes("Solo reservas activas pueden ser confirmadas")) {
+        return res.status(409).json({ message: msg });
+      }
+
+      return res.status(500).json({
+        message: "Error confirmando reserva",
+        error: msg,
+      });
+    }
+  }
+
+  // Cancelar reserva admin
+  static async adminCancel(req, res) {
+    try {
+      const idReserva = Number(req.params.idReserva);
+      if (!Number.isInteger(idReserva) || idReserva <= 0) {
+        return res.status(400).json({ message: "idReserva invalido" });
+      }
+      const result = await Reserva.cancelReservaAdmin(idReserva);
+      return res.json(result);
+    } catch (error) {
+      const msg = error.message || "Error cancelando reserva";
+
+      if (msg.includes("Reserva no encontrada")) {
+        return res.status(404).json({ message: msg });
+      }
+
+      if (msg.includes("Solo reservas activas")) {
+        return res.status(409).json({ message: msg });
+      }
+
+      return res.status(500).json({
+        message: "Error cancelando reserva admin",
+        error: msg,
+      });
+    }
+  }
 }
 
 module.exports = ReservaController;

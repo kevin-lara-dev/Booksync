@@ -1,7 +1,7 @@
 const pool = require("../config/db");
 
 class Reserva {
-  //expirar reservas vencidas
+  //EXPIRAR RESERVAS
   static async expireReservas(conn) {
     const [expired] = await conn.query(
       `SELECT id_reserva, id_libro FROM reserva WHERE estado = 'activa' AND expires_at < NOW()`,
@@ -21,14 +21,14 @@ class Reserva {
     }
   }
 
-  //crear reserva
+  //CREAR RESERVA
   static async createReserva(idUsuario, idLibro) {
     const conn = await pool.getConnection();
 
     try {
       await conn.beginTransaction();
 
-      //expirar reservas
+      //Expiramos reservas vencidas antes de validar
       await this.expireReservas(conn);
 
       //verificamos limite
@@ -40,7 +40,7 @@ class Reserva {
         throw new Error("Limite de 3 reservas activas alcanzado");
       }
 
-      // 3) Validar que no tenga ya una reserva activa o confirmada del mismo libro
+      // Validar que no tenga ya una reserva activa o confirmada del mismo libro
       const [[duplicada]] = await conn.query(
         `SELECT id_usuario, estado FROM reserva WHERE id_usuario = ? AND id_libro  = ? AND estado IN ('activa', 'confirmada', 'prestada') LIMIT 1`,
         [idUsuario, idLibro],
@@ -128,12 +128,12 @@ class Reserva {
 
       const [[reserva]] = await conn.query(
         `
-                SELECT id_libro, estado 
-                FROM reserva
-                WHERE id_reserva = ?
-                AND id_usuario = ?
-                FOR UPDATE
-                `,
+        SELECT id_libro, estado 
+        FROM reserva
+        WHERE id_reserva = ?
+        AND id_usuario = ?
+        FOR UPDATE
+        `,
         [idReserva, idUsuario],
       );
 
@@ -166,6 +166,150 @@ class Reserva {
 
       await conn.commit();
       return { message: "Reserva cancelada correctamente" };
+    } catch (error) {
+      await conn.rollback();
+      throw error;
+    } finally {
+      conn.release();
+    }
+  }
+
+  // =========================
+  // ADMIN
+  // =========================
+
+  // Listar todas las reservas para admin
+  static async listAllReservasAdmin() {
+    const conn = await pool.getConnection();
+    try {
+      await this.expireReservas(conn);
+
+      const [rows] = await conn.query(
+        `
+        SELECT 
+          r.id_reserva,
+          r.estado,
+          r.fecha_reserva,
+          r.expires_at,
+          r.cancelled_at,
+          r.confirmed_at,
+          r.id_usuario,
+          u.nombre,
+          u.apellido,
+          u.correo,
+          r.id_libro,
+          l.title,
+          l.author,
+          l.isbn,
+          l.cover
+        FROM reserva r
+        INNER JOIN usuario u ON u.id_usuario = r.id_usuario
+        INNER JOIN libro l ON l.id_libro = r.id_libro
+        ORDER BY r.fecha_reserva DESC
+        `,
+      );
+      return rows;
+    } finally {
+      conn.release();
+    }
+  }
+
+  //Confirmar reserva (admin)
+  static async confirmReservaAdmin(idReserva) {
+    const conn = await pool.getConnection();
+
+    try {
+      await conn.beginTransaction();
+
+      this.expireReservas(conn);
+
+      const [[reserva]] = await conn.query(
+        `
+        SELECT id_reserva, estado
+        FROM reserva
+        WHERE id_reserva = ?
+        FOR UPDATE
+        `,
+        [idReserva],
+      );
+
+      if (!reserva) {
+        throw new Error("Reserva no encontrada");
+      }
+
+      if (reserva.estado !== "activa") {
+        throw new Error("Solo reservas activas pueden ser confirmadas");
+      }
+
+      await conn.query(
+        `
+        UPDATE reserva
+        SET estado = 'confirmada', confirmed_at = NOW()
+        WHERE id_reserva = ?
+        `,
+        [idReserva],
+      );
+
+      await conn.commit();
+
+      return { message: "Reserva confirmada correctamente" };
+    } catch (error) {
+      await conn.rollback();
+      throw error;
+    } finally {
+      conn.release();
+    }
+  }
+
+  // Cancelar reserva desde admin
+  static async cancelReservaAdmin(idReserva) {
+    const conn = await pool.getConnection();
+
+    try {
+      await conn.beginTransaction();
+
+      await this.expireReservas(conn);
+
+      const [[reserva]] = await conn.query(
+        `
+        SELECT id_reserva, id_libro, estado
+        FROM reserva
+        WHERE id_reserva = ?
+        FOR UPDATE
+        `,
+        [idReserva],
+      );
+
+      if (!reserva) {
+        throw new Error("Reserva no encontrada");
+      }
+
+      if (reserva.estado !== "activa") {
+        throw new Error("Solo reservas activas pueden cancelarse");
+      }
+
+      await conn.query(
+        `
+        UPDATE reserva
+        SET estado = 'cancelada',
+            cancelled_at = NOW()
+        WHERE id_reserva = ?
+        `,
+        [idReserva],
+      );
+
+      await conn.query(
+        `
+        UPDATE libro
+        SET available_quantity = available_quantity + 1
+        WHERE id_libro = ?
+        `,
+        [reserva.id_libro],
+      );
+
+      await conn.commit();
+
+      return { message: "Reserva cancelada por el administrador" };
     } catch (error) {
       await conn.rollback();
       throw error;
