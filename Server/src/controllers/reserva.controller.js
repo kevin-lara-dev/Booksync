@@ -16,7 +16,7 @@ class ReservaController {
     } catch (error) {
       const msg = error.message || "Error creando reserva";
 
-      if (msg.includes("Límite")) {
+      if (msg.includes("Limite")) {
         return res.status(409).json({ message: msg });
       }
 
@@ -88,7 +88,7 @@ class ReservaController {
   // =========================
 
   //listar todas las reservas admin
-  static async admminList(req, res) {
+  static async adminList(req, res) {
     try {
       const rows = await Reserva.listAllReservasAdmin();
       return res.json({ reservas: rows });

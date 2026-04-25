@@ -5,13 +5,17 @@ const isAdmin = require("../middlewares/role.middleware");
 
 const router = express.Router();
 
-//usuario
+// ============================
+// usuario
+// ============================
 router.post("/:idLibro", verifyToken, ReservaController.create);
 router.get("/mis", verifyToken, ReservaController.myList);
 router.delete("/:idReserva", verifyToken, ReservaController.cancel);
 
-//admin
-router.get("/admin", verifyToken, isAdmin, ReservaController.admminList);
+// ============================
+// ADMIN
+// ============================
+router.get("/admin", verifyToken, isAdmin, ReservaController.adminList);
 router.patch(
   "/admin/:idReserva/confirmar",
   verifyToken,
