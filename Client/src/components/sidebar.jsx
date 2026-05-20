@@ -61,22 +61,20 @@ function Sidebar({ onLogout }) {
       <div className="side-tools">
         <Link className="tool" title="Cuenta" to="/Cuenta">
           <i className="fa-regular fa-user" />
-          <small></small>
+          <small>Cuenta</small>
         </Link>
 
-        <Link className="tool" title="Ajustes" to="/Ajustes">
-          <i className="fa-solid fa-gear" />
-          <small></small>
-        </Link>
+        <div className="side-tools__sep" />
 
         <button
           id="btn-logout"
-          className="tool"
+          className="tool tool--logout"
           title="Salir"
           type="button"
           onClick={handleLogout}
         >
           <i className="fa-solid fa-right-from-bracket" />
+          <small>Salir</small>
         </button>
       </div>
     </aside>

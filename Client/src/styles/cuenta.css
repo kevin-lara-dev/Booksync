@@ -18,10 +18,7 @@
     min-height: 100vh;
     padding: 24px 32px;
     box-sizing: border-box;
-    background-image: url("/FONDO.png");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    background: url("/FONDO.png") center/cover no-repeat fixed;
     overflow-y: auto;
   }
   
@@ -160,11 +157,12 @@
     flex: 0 0 500px;             
   }
   
-  /* Columna derecha (Dispositivos) */
+  /* Columna derecha (Sesión + Seguridad) */
   .account-page .account-right {
-    flex: 0 0 420px;
+    flex: 0 0 320px;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    gap: 20px;
   }
   
   /* Etiqueta “Datos guardados” */
@@ -223,12 +221,11 @@
   
   .account-page .account-devices-card {
     width: 100%;
-    max-width: 420px;
     padding: 22px 24px 20px;
     border-radius: 10px;
     background: rgba(248, 240, 225, 0.96);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
-    margin-top: 50px;           
+    box-sizing: border-box;
   }
   
   .account-page .account-devices__title {
@@ -353,6 +350,44 @@
   }
   
   /* ===========================
+     CARD SEGURIDAD (contraseña)
+     =========================== */
+
+  .account-page .account-security-card {
+    width: 100%;
+    padding: 22px 24px 20px;
+    border-radius: 10px;
+    background: rgba(248, 240, 225, 0.96);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    box-sizing: border-box;
+  }
+
+  .account-page .account-security-card__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .account-page .account-security-card__icon {
+    font-size: 1.2rem;
+    color: #8b5a12;
+  }
+
+  .account-page .account-security-card__title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #000;
+  }
+
+  .account-page .account-security-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* ===========================
      ZONA DE PELIGRO (DESACTIVAR)
      =========================== */
   
@@ -391,14 +426,9 @@
       flex: 0 1 auto;
       width: 100%;
     }
-  
+
     .account-page .account-form {
       max-width: 100%;
-    }
-  
-    .account-page .account-devices-card {
-      max-width: 480px;
-      margin-top: 16px;
     }
   }
   

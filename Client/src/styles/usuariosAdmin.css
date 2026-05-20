@@ -13,10 +13,7 @@
     min-height: 100vh;
     padding: 24px 32px;
     box-sizing: border-box;
-    background-image: url("/FONDO.png");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    background: url("/FONDO.png") center/cover no-repeat fixed;
     overflow-y: auto;
   }
   

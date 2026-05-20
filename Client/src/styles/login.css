@@ -229,3 +229,9 @@ input[type="password"] {
   font-weight: 500;
   margin: 10px 5px !important;
 }
+
+.swal-confirm-booksync {
+  border-radius: 18px !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35) !important;
+  border: 1px solid rgba(189, 142, 57, 0.4) !important;
+}

@@ -82,7 +82,7 @@ class Libro {
 
         order = order === "ASC" ? "ASC" : "DESC";
 
-        sql += `ORDER BY ${sort} ${order}`;
+        sql += ` ORDER BY ${sort} ${order}`;
 
         const [rows] = await pool.query(sql, values)
         return rows

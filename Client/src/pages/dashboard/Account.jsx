@@ -1,268 +1,277 @@
-import { useState } from "react";
-import Sidebar from "../../components/sidebar"; 
-import {useLogoutToast} from "../../hooks/useLogoutToast";
+import { useState, useEffect } from "react";
+import Sidebar from "../../components/sidebar";
+import { useLogoutToast } from "../../hooks/useLogoutToast";
+import { useAuth } from "../../context/AuthContext";
+import {
+  getProfile,
+  updateProfile,
+  changePassword,
+  deleteProfile,
+} from "../../services/user.service";
+import Swal from "sweetalert2";
 
+const TOAST_BASE = {
+  toast: true,
+  position: "top",
+  showConfirmButton: false,
+  timer: 2500,
+  timerProgressBar: true,
+  background: "#fff",
+  customClass: { popup: "burbuja-mini", icon: "icono-pequeno" },
+};
 
-function Account({
+function Account() {
+  const { logout } = useAuth();
+  const { toast, openToast } = useLogoutToast();
 
-    user,
-    devices = [],
-    onSaveProfile,
-    onLogout,
-    onLogoutAll,
-    onDeactivate,
-}) {
-    const [formData, setFormData] = useState({
-        fullName: user?.fullName || "Kevin Steven Uribe Lara",
-        email: user?.email || "kevinesteven0627@gmail.com",
-        birthDate: user?.birthDate || "",
-        documentId: user?.documentId || "1070004611",
-    });
+  const [perfil, setPerfil] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState({
+    nombre: "",
+    apellido: "",
+    correo: "",
+    fecha_nacimiento: "",
+    tipo_documento: "",
+    numero_documento: "",
+  });
+  const [passwords, setPasswords] = useState({
+    current: "",
+    next: "",
+    confirm: "",
+  });
+  const [savingPassword, setSavingPassword] = useState(false);
 
-    const  {toast, openToast} = useLogoutToast()
-
-    const handleChange = (event) => {
-        const { name, value } = event.target;
-        setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-        }));
+  useEffect(() => {
+    const fetchPerfil = async () => {
+      try {
+        const data = await getProfile();
+        setPerfil(data);
+        setFormData({
+          nombre: data.nombre || "",
+          apellido: data.apellido || "",
+          correo: data.correo || "",
+          fecha_nacimiento: data.fecha_nacimiento
+            ? data.fecha_nacimiento.split("T")[0]
+            : "",
+          tipo_documento: data.tipo_documento || "",
+          numero_documento: data.numero_documento || "",
+        });
+      } catch (err) {
+        console.error("Error al cargar perfil:", err);
+      } finally {
+        setLoading(false);
+      }
     };
+    fetchPerfil();
+  }, []);
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        if (onSaveProfile) {
-            onSaveProfile(formData);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswords((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await updateProfile(formData);
+      Swal.fire({ ...TOAST_BASE, text: "Perfil actualizado correctamente", icon: "success", iconColor: "#2ecc71" });
+    } catch (err) {
+      Swal.fire({ ...TOAST_BASE, text: err?.response?.data?.message || "Error al actualizar perfil", icon: "error", iconColor: "#e74c3c" });
+    }
+  };
+
+  const handleSubmitPassword = async (e) => {
+    e.preventDefault();
+
+    if (!passwords.current || !passwords.next || !passwords.confirm) {
+      Swal.fire({ ...TOAST_BASE, text: "Completa todos los campos de contraseña", icon: "error", iconColor: "#e74c3c" });
+      return;
+    }
+    if (passwords.next !== passwords.confirm) {
+      Swal.fire({ ...TOAST_BASE, text: "Las contraseñas nuevas no coinciden", icon: "error", iconColor: "#e74c3c" });
+      return;
+    }
+
+    setSavingPassword(true);
+    try {
+      await changePassword(passwords.current, passwords.next);
+      Swal.fire({ ...TOAST_BASE, text: "Contraseña actualizada correctamente", icon: "success", iconColor: "#2ecc71" });
+      setPasswords({ current: "", next: "", confirm: "" });
+    } catch (err) {
+      Swal.fire({ ...TOAST_BASE, text: err?.response?.data?.message || "Error al cambiar contraseña", icon: "error", iconColor: "#e74c3c" });
+    } finally {
+      setSavingPassword(false);
+    }
+  };
+
+  const handleDeactivate = () => {
+    Swal.fire({
+      title: "¿Estás seguro?",
+      text: "Esta acción desactivará tu cuenta permanentemente.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí, desactivar",
+      cancelButtonText: "Cancelar",
+      background: "#fef6e1",
+      color: "#2b1b0b",
+      confirmButtonColor: "#b31313",
+      cancelButtonColor: "#9e8c78",
+      customClass: { popup: "swal-confirm-booksync" },
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await deleteProfile();
+        } catch (err) {
+          console.error(err);
+        } finally {
+          logout();
         }
-    };
+      }
+    });
+  };
 
-    const handleLogoutHere = () => {
-        if (onLogout) onLogout();
-    };
+  const avatarInitial = perfil?.nombre?.trim()?.charAt(0)?.toUpperCase() || "U";
 
-    const handleLogoutAll = () => {
-        if (onLogoutAll) onLogoutAll();
-    };
+  if (loading) return <p style={{ padding: "2rem" }}>Cargando perfil...</p>;
 
-    const handleDeactivate = () => {
-        if (onDeactivate) onDeactivate();
-    };
+  return (
+    <div className="account-page">
+      <div className="account-layout">
+        <Sidebar onLogout={openToast} />
+        <div className="account-main">
+          <div className="account-page__inner">
+            <div className="account-page__panel">
 
-    const avatarInitial =
-        formData.fullName?.trim()?.charAt(0)?.toUpperCase() || "U";
-
-    return (
-        <div className="account-page">
-            <div className="account-layout">
-                <Sidebar onLogout={openToast} />
-
-                <div className="account-main">
-                    <div className="account-page__inner">
-                        <div className="account-page__panel">
-                            {/* ===== HEADER ===== */}
-                            <header className="account-header">
-                                <h1 className="account-header__title">CUENTA</h1>
-
-                                <div className="account-header__row">
-                                    {/* Avatar a la izquierda */}
-                                    <div className="account-header__avatar">
-                                        <div className="account-avatar-circle">
-                                            <span>{avatarInitial}</span>
-                                        </div>
-                                        </div>
-
-                                        {/* Usuario + chips a la derecha */}
-                                        <div className="account-header__user-block">
-                                            <div className="account-header__user-top">
-                                                <span className="account-header__user-label">
-                                                Usuario
-                                                </span>
-                                                <input
-                                                    className="account-header__user-input"
-                                                    type="text"
-                                                    value={user?.name || "kevinejemplo"}
-                                                    disabled
-                                                />
-                                            </div>
-
-                                        <div className="account-header__chips">
-                                            <span className="account-chip account-chip--role">
-                                                USUARIO
-                                            </span>
-                                            <span className="account-chip account-chip--status">
-                                                ACTIVO
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </header>
-
-                            {/* ===== CUERPO ===== */}
-                            <main className="account-body">
-                                {/* IZQUIERDA: DATOS GUARDADOS */}
-                                <section className="account-left">
-                                    <div className="account-section-label">DATOS GUARDADOS</div>
-
-                                    <form className="account-form" onSubmit={handleSubmit}>
-                                        <div className="account-form__field">
-                                            <label htmlFor="fullName">Nombre</label>
-                                            <input
-                                                id="fullName"
-                                                name="fullName"
-                                                type="text"
-                                                value={formData.fullName}
-                                                onChange={handleChange}
-                                            />
-                                        </div>
-
-                                        <div className="account-form__field">
-                                            <label htmlFor="email">Correo</label>
-                                            <input
-                                                id="email"
-                                                name="email"
-                                                type="email"
-                                                value={formData.email}
-                                                onChange={handleChange}
-                                            />
-                                        </div>
-
-                                        <div className="account-form__field">
-                                            <label htmlFor="birthDate">Fecha de nacimiento</label>
-                                            <input
-                                                id="birthDate"
-                                                name="birthDate"
-                                                type="date"
-                                                value={formData.birthDate}
-                                                onChange={handleChange}
-                                            />
-                                        </div>
-
-                                        <div className="account-form__field">
-                                            <label htmlFor="documentId">
-                                                Número de identificación
-                                            </label>
-                                            <input
-                                                id="documentId"
-                                                name="documentId"
-                                                type="text"
-                                                value={formData.documentId}
-                                                onChange={handleChange}
-                                            />
-                                        </div>
-
-                                        <div className="account-form__actions">
-                                            <button
-                                                type="submit"
-                                                className="account-btn account-btn--primary"
-                                            >
-                                                <span
-                                                    className="account-btn__icon"
-                                                    aria-hidden="true"
-                                                >
-                                                    <i className="fa-solid fa-lock" />
-                                                </span>
-                                                    Guardar cambios
-                                            </button>
-                                        </div>
-                                    </form>
-                                </section>
-
-                                {/* DERECHA: DISPOSITIVOS */}
-                                <section className="account-right">
-                                    <div className="account-devices-card">
-                                        <h2 className="account-devices__title">
-                                            Dispositivos vinculados
-                                        </h2>
-                                        <p className="account-devices__subtitle">
-                                            Estás conectado en este dispositivo.
-                                        </p>
-
-                                        <div className="account-devices__table-wrapper">
-                                            <table className="account-devices__table">
-                                                <thead>
-                                                    <tr>
-                                                        <th></th>
-                                                        <th>Dispositivo</th>
-                                                        <th>Última conexión</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {(devices.length
-                                                    ? devices
-                                                    : [
-                                                        {
-                                                            id: 1,
-                                                            name: "Windows",
-                                                            lastConnection:"5 de diciembre, 12:11 pm",
-                                                            current: true,
-                                                        },
-                                                        {
-                                                            id: 2,
-                                                            name: "Xiaomi_redmi4",
-                                                            lastConnection:"12 de diciembre, 8:30 am",
-                                                        },
-                                                        {
-                                                            id: 3,
-                                                            name: "Moto_G52",
-                                                            lastConnection:"3 de diciembre, 6:15 pm",
-                                                        },
-                                                        ]).map((device) => (
-                                                            <tr
-                                                                key={device.id || device.name}
-                                                                className={
-                                                                    device.current
-                                                                    ? "account-device--current"
-                                                                    : ""
-                                                                }
-                                                            >
-                                                                <td className="account-device__icon-cell">
-                                                                    <i className="fa-solid fa-satellite-dish" />
-                                                                </td>
-                                                                <td>{device.name}</td>
-                                                                <td>{device.lastConnection}</td>
-                                                            </tr>
-                                                        ))}
-                                                </tbody>
-                                            </table>
-                                        </div>
-
-                                        <div className="account-devices__actions">
-                                            <button
-                                                type="button"
-                                                className="account-btn account-btn--dark"
-                                                onClick={handleLogoutHere}
-                                            >
-                                                Cerrar sesión aquí
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className="account-btn account-btn--dark"
-                                                onClick={handleLogoutAll}
-                                            >
-                                                Cerrar sesión en todos
-                                            </button>
-                                        </div>
-                                    </div>
-                                </section>
-                            </main>
-
-                            {/* ===== ZONA DE PELIGRO ===== */}
-                            <footer className="account-danger-zone">
-                                <button
-                                    type="button"
-                                    className="account-btn account-btn--danger"
-                                    onClick={handleDeactivate}
-                                >
-                                    Solicitar desactivación
-                                </button>
-                            </footer>
-                        </div>
+              {/* HEADER */}
+              <header className="account-header">
+                <h1 className="account-header__title">CUENTA</h1>
+                <div className="account-header__row">
+                  <div className="account-header__avatar">
+                    <div className="account-avatar-circle">
+                      <span>{avatarInitial}</span>
                     </div>
+                  </div>
+                  <div className="account-header__user-block">
+                    <div className="account-header__user-top">
+                      <span className="account-header__user-label">Usuario</span>
+                      <input
+                        className="account-header__user-input"
+                        type="text"
+                        value={perfil?.correo || ""}
+                        disabled
+                      />
+                    </div>
+                    <div className="account-header__chips">
+                      <span className="account-chip account-chip--role">
+                        {perfil?.tipo?.toUpperCase() || "USUARIO"}
+                      </span>
+                      <span className="account-chip account-chip--status">
+                        {perfil?.estado?.toUpperCase() || "ACTIVO"}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                {toast}
+              </header>
+
+              {/* CUERPO */}
+              <main className="account-body">
+
+                {/* IZQUIERDA — datos personales */}
+                <section className="account-left">
+                  <div className="account-section-label">DATOS GUARDADOS</div>
+                  <form className="account-form" onSubmit={handleSubmit}>
+                    <div className="account-form__field">
+                      <label htmlFor="nombre">Nombre</label>
+                      <input id="nombre" name="nombre" type="text" value={formData.nombre} onChange={handleChange} />
+                    </div>
+                    <div className="account-form__field">
+                      <label htmlFor="apellido">Apellido</label>
+                      <input id="apellido" name="apellido" type="text" value={formData.apellido} onChange={handleChange} />
+                    </div>
+                    <div className="account-form__field">
+                      <label htmlFor="correo">Correo</label>
+                      <input id="correo" name="correo" type="email" value={formData.correo} onChange={handleChange} />
+                    </div>
+                    <div className="account-form__field">
+                      <label htmlFor="fecha_nacimiento">Fecha de nacimiento</label>
+                      <input id="fecha_nacimiento" name="fecha_nacimiento" type="date" value={formData.fecha_nacimiento} onChange={handleChange} />
+                    </div>
+                    <div className="account-form__field">
+                      <label htmlFor="numero_documento">Número de identificación</label>
+                      <input id="numero_documento" name="numero_documento" type="text" value={formData.numero_documento} onChange={handleChange} />
+                    </div>
+                    <div className="account-form__actions">
+                      <button type="submit" className="account-btn account-btn--primary">
+                        <i className="fa-solid fa-floppy-disk" /> Guardar cambios
+                      </button>
+                    </div>
+                  </form>
+                </section>
+
+                {/* DERECHA — sesión + seguridad */}
+                <section className="account-right">
+
+                  {/* Card sesión activa */}
+                  <div className="account-devices-card">
+                    <h2 className="account-devices__title">Sesión activa</h2>
+                    <p className="account-devices__subtitle">Estás conectado en este dispositivo.</p>
+                    <div className="account-devices__actions">
+                      <button type="button" className="account-btn account-btn--dark" onClick={openToast}>
+                        Cerrar sesión
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Card seguridad — contraseña */}
+                  <div className="account-security-card">
+                    <div className="account-security-card__header">
+                      <i className="fa-solid fa-shield-halved account-security-card__icon" />
+                      <h2 className="account-security-card__title">Seguridad</h2>
+                    </div>
+                    <form className="account-security-form" onSubmit={handleSubmitPassword}>
+                      <div className="account-form__field">
+                        <label htmlFor="current-pw">Contraseña actual</label>
+                        <input id="current-pw" name="current" type="password" value={passwords.current} onChange={handlePasswordChange} />
+                      </div>
+                      <div className="account-form__field">
+                        <label htmlFor="next-pw">Nueva contraseña</label>
+                        <input id="next-pw" name="next" type="password" value={passwords.next} onChange={handlePasswordChange} />
+                      </div>
+                      <div className="account-form__field">
+                        <label htmlFor="confirm-pw">Confirmar contraseña</label>
+                        <input id="confirm-pw" name="confirm" type="password" value={passwords.confirm} onChange={handlePasswordChange} />
+                      </div>
+                      <div className="account-form__actions">
+                        <button type="submit" className="account-btn account-btn--primary" disabled={savingPassword}>
+                          <i className="fa-solid fa-key" />
+                          {savingPassword ? " Guardando..." : " Actualizar contraseña"}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+
+                </section>
+              </main>
+
+              {/* ZONA DE PELIGRO */}
+              <footer className="account-danger-zone">
+                <button type="button" className="account-btn account-btn--danger" onClick={handleDeactivate}>
+                  Solicitar desactivación
+                </button>
+              </footer>
+
             </div>
+          </div>
         </div>
-    );
+        {toast}
+      </div>
+    </div>
+  );
 }
 
 export default Account;

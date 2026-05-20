@@ -10,7 +10,6 @@ import ReservasUsuario from "./pages/dashboard/ReservasUsuario.jsx";
 import PrestamosUsuarios from "./pages/dashboard/PrestamosUsuarios.jsx";
 import Favorites from "./pages/dashboard/Favorites.jsx";
 import Account from "./pages/dashboard/Account.jsx";
-import Settings from "./pages/dashboard/Settings.jsx";
 
 import InventarioAdmin from "./pages/Admin/InventarioAdmin.jsx";
 import ReservasAdmin from "./pages/Admin/ReservasAdmin.jsx";
@@ -32,7 +31,6 @@ function App() {
       <Route path="/Prestamos" element={<PrestamosUsuarios />} />
       <Route path="/Favoritos" element={<Favorites />} />
       <Route path="/Cuenta" element={<Account />} />
-      <Route path="/Ajustes" element={<Settings />} />
 
       {/* ===== RUTAS ADMIN ===== */}
       <Route
