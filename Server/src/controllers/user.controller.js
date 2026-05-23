@@ -160,7 +160,7 @@ class UserController {
   static async changePassword(req, res) {
     try {
       const userId = req.user.id;
-      const { currentPassword: passwordActual, newPassword: passwordNueva } = req.body;
+      const { passwordActual, passwordNueva } = req.body;
 
       if (!passwordActual || !passwordNueva) {
         return res.status(400).json({

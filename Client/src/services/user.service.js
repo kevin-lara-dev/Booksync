@@ -31,10 +31,10 @@ export const updateProfile = async (profileData) => {
 };
 
 //cambiar contraseña
-export const changePassword = async (currentPassword, newPassword) => {
+export const changePassword = async (passwordActual, passwordNueva) => {
   const { data } = await api.patch("/users/profile/password", {
-    currentPassword,
-    newPassword,
+    passwordActual,
+    passwordNueva,
   });
   return data;
 };
