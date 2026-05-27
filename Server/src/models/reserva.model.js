@@ -201,7 +201,8 @@ class Reserva {
           l.title,
           l.author,
           l.isbn,
-          l.cover
+          l.cover,
+          l.genre
         FROM reserva r
         INNER JOIN usuario u ON u.id_usuario = r.id_usuario
         INNER JOIN libro l ON l.id_libro = r.id_libro

@@ -214,7 +214,13 @@ function ReservasUsuario() {
             )}
 
             {!loading && reservas.length === 0 && (
-              <p className="reservas-empty">No tienes reservas todavía.</p>
+              <div className="reservas-empty-state">
+                <i className="fa-solid fa-bookmark reservas-empty-icon" />
+                <p className="reservas-empty-title">No tienes reservas activas</p>
+                <p className="reservas-empty-sub">
+                  Explora el catálogo y reserva el libro que quieras leer.
+                </p>
+              </div>
             )}
 
             <div className="reservas-grid">

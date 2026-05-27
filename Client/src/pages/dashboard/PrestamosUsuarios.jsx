@@ -144,7 +144,13 @@ function PrestamosUsuarios() {
             )}
 
             {!loading && prestamos.length === 0 && (
-              <p className="prestamos-empty">No tienes préstamos todavía.</p>
+              <div className="prestamos-empty-state">
+                <i className="fa-solid fa-book-open prestamos-empty-icon" />
+                <p className="prestamos-empty-title">No tienes préstamos activos</p>
+                <p className="prestamos-empty-sub">
+                  Cuando el administrador registre un préstamo para ti, aparecerá aquí.
+                </p>
+              </div>
             )}
 
             <div className="prestamos-grid">

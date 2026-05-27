@@ -26,10 +26,10 @@
     EMPTY / LOADING
 ================================ */
 
-.prestamos-empty,
 .prestamos-loading {
   color: #f5f3e8;
   font-size: 0.95rem;
   text-align: center;
   padding: 16px 0;
 }
+

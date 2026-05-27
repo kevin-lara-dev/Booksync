@@ -16,6 +16,11 @@ function ReservasAdmin() {
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState([]);
   const [paginaActual, setPaginaActual] = useState(1);
+  const [creandoPrestamo, setCreandoPrestamo] = useState(new Set());
+  const [filtroEstado, setFiltroEstado] = useState("");
+  const [filtroFecha, setFiltroFecha] = useState("");
+  const [filtroUsuario, setFiltroUsuario] = useState("");
+  const [filtroGenero, setFiltroGenero] = useState("");
   const [toastReserva, setToastReserva] = useState({
     show: false,
     title: "",
@@ -50,10 +55,9 @@ function ReservasAdmin() {
     cargarReservas();
   }, []);
 
-  // Resetear página al buscar
   useEffect(() => {
     setPaginaActual(1);
-  }, [search]);
+  }, [search, filtroEstado, filtroFecha, filtroUsuario, filtroGenero]);
 
   const formatDate = (dateString) => {
     if (!dateString) return "No disponible";
@@ -91,16 +95,59 @@ function ReservasAdmin() {
     return map[estado] || estado;
   };
 
+  const usuariosDisponibles = useMemo(() => {
+    const map = new Map();
+    reservas.forEach((r) => {
+      if (!map.has(r.id_usuario)) map.set(r.id_usuario, getUsuario(r));
+    });
+    return Array.from(map.entries()).sort((a, b) => a[1].localeCompare(b[1]));
+  }, [reservas]);
+
+  const generosDisponibles = useMemo(() => {
+    const set = new Set(reservas.map((r) => r.genre).filter(Boolean));
+    return Array.from(set).sort();
+  }, [reservas]);
+
   const reservasFiltradas = useMemo(() => {
-    if (!search.trim()) return reservas;
-    const term = search.toLowerCase();
-    return reservas.filter((res) =>
-      [res.isbn, res.title, res.author, getUsuario(res), res.correo, res.estado]
-        .join(" ")
-        .toLowerCase()
-        .includes(term),
-    );
-  }, [reservas, search]);
+    return reservas.filter((res) => {
+      const matchSearch =
+        !search.trim() ||
+        [res.isbn, res.title, res.author, getUsuario(res), res.correo, res.estado]
+          .join(" ")
+          .toLowerCase()
+          .includes(search.toLowerCase());
+
+      const matchEstado = !filtroEstado || res.estado === filtroEstado;
+
+      const matchUsuario =
+        !filtroUsuario || String(res.id_usuario) === filtroUsuario;
+
+      const matchGenero = !filtroGenero || res.genre === filtroGenero;
+
+      const matchFecha = (() => {
+        if (!filtroFecha) return true;
+        const fecha = new Date(res.fecha_reserva);
+        const ahora = new Date();
+        if (filtroFecha === "hoy") {
+          const hoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
+          return fecha >= hoy;
+        }
+        if (filtroFecha === "semana") {
+          const hace7 = new Date(ahora);
+          hace7.setDate(hace7.getDate() - 7);
+          return fecha >= hace7;
+        }
+        if (filtroFecha === "mes") {
+          const hace30 = new Date(ahora);
+          hace30.setDate(hace30.getDate() - 30);
+          return fecha >= hace30;
+        }
+        return true;
+      })();
+
+      return matchSearch && matchEstado && matchUsuario && matchGenero && matchFecha;
+    });
+  }, [reservas, search, filtroEstado, filtroFecha, filtroUsuario, filtroGenero]);
 
   // Paginado
   const totalPaginas = Math.ceil(reservasFiltradas.length / ITEMS_POR_PAGINA);
@@ -231,6 +278,7 @@ function ReservasAdmin() {
   };
 
   const handleCrearPrestamo = async (idReserva) => {
+    setCreandoPrestamo((prev) => new Set(prev).add(idReserva));
     try {
       const res = await crearPrestamo(idReserva);
       setReservas((prev) =>
@@ -244,6 +292,12 @@ function ReservasAdmin() {
         "Error",
         error?.response?.data?.message || "Error creando préstamo",
       );
+    } finally {
+      setCreandoPrestamo((prev) => {
+        const next = new Set(prev);
+        next.delete(idReserva);
+        return next;
+      });
     }
   };
 
@@ -328,26 +382,79 @@ function ReservasAdmin() {
             </div>
 
             <div className="reservas-admin-filters-row">
-              <button type="button" className="res-chip">
+              <label className={`res-chip ${filtroUsuario ? "res-chip--active" : ""}`}>
                 <i className="fa-solid fa-user" />
-                <span>Usuario</span>
-                <i className="fa-solid fa-chevron-down" />
-              </button>
-              <button type="button" className="res-chip">
+                <select
+                  className="res-chip-select"
+                  value={filtroUsuario}
+                  onChange={(e) => setFiltroUsuario(e.target.value)}
+                >
+                  <option value="">Usuario</option>
+                  {usuariosDisponibles.map(([id, nombre]) => (
+                    <option key={id} value={String(id)}>{nombre}</option>
+                  ))}
+                </select>
+              </label>
+
+              <label className={`res-chip ${filtroEstado ? "res-chip--active" : ""}`}>
                 <i className="fa-solid fa-toggle-on" />
-                <span>Estado</span>
-                <i className="fa-solid fa-chevron-down" />
-              </button>
-              <button type="button" className="res-chip">
+                <select
+                  className="res-chip-select"
+                  value={filtroEstado}
+                  onChange={(e) => setFiltroEstado(e.target.value)}
+                >
+                  <option value="">Estado</option>
+                  <option value="activa">Activa</option>
+                  <option value="confirmada">Confirmada</option>
+                  <option value="cancelada">Cancelada</option>
+                  <option value="expirada">Expirada</option>
+                  <option value="prestada">Prestada</option>
+                </select>
+              </label>
+
+              <label className={`res-chip ${filtroFecha ? "res-chip--active" : ""}`}>
                 <i className="fa-solid fa-calendar-day" />
-                <span>Fecha</span>
-                <i className="fa-solid fa-chevron-down" />
-              </button>
-              <button type="button" className="res-chip">
+                <select
+                  className="res-chip-select"
+                  value={filtroFecha}
+                  onChange={(e) => setFiltroFecha(e.target.value)}
+                >
+                  <option value="">Fecha</option>
+                  <option value="hoy">Hoy</option>
+                  <option value="semana">Últimos 7 días</option>
+                  <option value="mes">Últimos 30 días</option>
+                </select>
+              </label>
+
+              <label className={`res-chip ${filtroGenero ? "res-chip--active" : ""}`}>
                 <i className="fa-solid fa-layer-group" />
-                <span>Categoría</span>
-                <i className="fa-solid fa-chevron-down" />
-              </button>
+                <select
+                  className="res-chip-select"
+                  value={filtroGenero}
+                  onChange={(e) => setFiltroGenero(e.target.value)}
+                >
+                  <option value="">Categoría</option>
+                  {generosDisponibles.map((g) => (
+                    <option key={g} value={g}>{g}</option>
+                  ))}
+                </select>
+              </label>
+
+              {(filtroEstado || filtroFecha || filtroUsuario || filtroGenero) && (
+                <button
+                  type="button"
+                  className="res-chip res-chip--clear"
+                  onClick={() => {
+                    setFiltroEstado("");
+                    setFiltroFecha("");
+                    setFiltroUsuario("");
+                    setFiltroGenero("");
+                  }}
+                >
+                  <i className="fa-solid fa-xmark" />
+                  <span>Limpiar</span>
+                </button>
+              )}
             </div>
 
             <div className="reservas-admin-table-wrapper">
@@ -439,9 +546,16 @@ function ReservasAdmin() {
                               type="button"
                               className="row-action"
                               title="Crear préstamo"
+                              disabled={creandoPrestamo.has(res.id_reserva)}
                               onClick={() => handleCrearPrestamo(res.id_reserva)}
                             >
-                              <i className="fa-solid fa-book-open-reader" />
+                              <i
+                                className={
+                                  creandoPrestamo.has(res.id_reserva)
+                                    ? "fa-solid fa-spinner fa-spin"
+                                    : "fa-solid fa-book-open-reader"
+                                }
+                              />
                             </button>
                           ) : (
                             <span title="Sin acciones disponibles">
@@ -455,9 +569,15 @@ function ReservasAdmin() {
                   {!loading && reservasFiltradas.length === 0 && (
                     <tr>
                       <td colSpan={9} className="no-results">
-                        {search
-                          ? `No se encontraron reservas para "${search}".`
-                          : "No hay reservas disponibles."}
+                        <div className="table-empty-state">
+                          <i className={`table-empty-icon fa-solid ${search ? "fa-magnifying-glass" : "fa-calendar-xmark"}`} />
+                          <p className="table-empty-title">
+                            {search ? `Sin resultados para "${search}"` : "No hay reservas registradas"}
+                          </p>
+                          <p className="table-empty-sub">
+                            {search ? "Intenta con otro término de búsqueda." : "Las reservas aparecerán aquí cuando los usuarios las creen."}
+                          </p>
+                        </div>
                       </td>
                     </tr>
                   )}

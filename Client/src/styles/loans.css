@@ -217,6 +217,48 @@
 }
 
 /* ================================
+    EMPTY STATE (páginas de usuario)
+================================ */
+
+.prestamos-empty-state,
+.reservas-empty-state,
+.favoritos-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.prestamos-empty-icon,
+.reservas-empty-icon,
+.favoritos-empty-icon {
+  font-size: 3.5rem;
+  color: rgba(255, 214, 102, 0.5);
+}
+
+.prestamos-empty-title,
+.reservas-empty-title,
+.favoritos-empty-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #f5f3e8;
+  margin: 0;
+}
+
+.prestamos-empty-sub,
+.reservas-empty-sub,
+.favoritos-empty-sub {
+  font-size: 0.85rem;
+  color: rgba(245, 243, 232, 0.55);
+  max-width: 320px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ================================
     RESPONSIVE
 ================================ */
 

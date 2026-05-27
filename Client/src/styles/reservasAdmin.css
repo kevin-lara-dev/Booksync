@@ -193,6 +193,44 @@
   font-size: 0.75rem;
 }
 
+.res-chip-select {
+  border: none;
+  background: transparent;
+  font-size: 0.8rem;
+  cursor: pointer;
+  outline: none;
+  color: #1a1a1a;
+  padding: 0;
+}
+
+.res-chip--active {
+  background: #f7d470;
+  border-color: rgba(0, 0, 0, 0.6);
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.res-chip i {
+  color: #1a1a1a;
+}
+
+.res-chip--clear {
+  background: linear-gradient(135deg, #f7e4b6, #e2c27a);
+  border: none;
+  color: #1b160e;
+  font-weight: 700;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.res-chip--clear:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35);
+}
+
+.res-chip--clear:active {
+  transform: scale(0.95);
+}
+
 /* ===== TABLA DE RESERVAS ===== */
 
 .reservas-admin-table-wrapper {
@@ -305,9 +343,32 @@
 
 .no-results {
   text-align: center;
-  padding: 18px 12px;
-  font-style: italic;
+  padding: 40px 12px;
+}
+
+.table-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.table-empty-icon {
+  font-size: 2.2rem;
+  color: rgba(255, 214, 102, 0.45);
+}
+
+.table-empty-title {
+  font-size: 0.95rem;
+  font-weight: 600;
   color: #f5e9d0;
+  margin: 0;
+}
+
+.table-empty-sub {
+  font-size: 0.8rem;
+  color: rgba(245, 233, 208, 0.55);
+  margin: 0;
 }
 
 /* ===== FOOTER ACCIONES MASIVAS ===== */

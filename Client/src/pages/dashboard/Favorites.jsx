@@ -132,13 +132,16 @@ function Favorites() {
 
           {/* Lista de favoritos */}
           <section className="favoritos-panel">
-            {loading && <p>Cargando favoritos...</p>}
+            {loading && <p className="prestamos-loading">Cargando favoritos...</p>}
 
             {!loading && favorites.length === 0 && (
-              <p>
-                No tienes favoritos todavía. Ve al detalle de un libro y
-                guárdalo ⭐
-              </p>
+              <div className="favoritos-empty-state">
+                <i className="fa-solid fa-heart favoritos-empty-icon" />
+                <p className="favoritos-empty-title">No tienes favoritos todavía</p>
+                <p className="favoritos-empty-sub">
+                  Ve al detalle de un libro y guárdalo para encontrarlo fácilmente aquí.
+                </p>
+              </div>
             )}
             <div className="favoritos-grid">
               {favorites.map((libro) => {

@@ -229,9 +229,15 @@ function PrestamosAdmin() {
                   {!loading && prestamosFiltrados.length === 0 && (
                     <tr>
                       <td colSpan={8} className="no-results">
-                        {search
-                          ? `No se encontraron préstamos para "${search}".`
-                          : "No hay préstamos disponibles."}
+                        <div className="table-empty-state">
+                          <i className={`table-empty-icon fa-solid ${search ? "fa-magnifying-glass" : "fa-hand-holding-heart"}`} />
+                          <p className="table-empty-title">
+                            {search ? `Sin resultados para "${search}"` : "No hay préstamos registrados"}
+                          </p>
+                          <p className="table-empty-sub">
+                            {search ? "Intenta con otro término de búsqueda." : "Los préstamos se crean desde la gestión de reservas."}
+                          </p>
+                        </div>
                       </td>
                     </tr>
                   )}

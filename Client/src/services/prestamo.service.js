@@ -16,6 +16,6 @@ export const crearPrestamo = async (idReserva) => {
 };
 
 export const devolverPrestamo = async (idPrestamo) => {
-  const { data } = await api.post(`/prestamos/devolver/${idPrestamo}`);
+  const { data } = await api.patch(`/prestamos/devolver/${idPrestamo}`);
   return data;
 };

@@ -21,10 +21,10 @@ function Sidebar({ onLogout }) {
       </Link>
 
       <nav className="side-actions">
-      <Link className="side-btn" title="Favoritos" to="/Favoritos">
+        <Link className="side-btn" title="Favoritos" to="/Favoritos">
           <i className="fa-solid fa-heart" />
           <small></small>
-      </Link>
+        </Link>
 
         <Link className="side-btn" title="Reservas" to="/Reservas">
           <i className="fa-solid fa-bookmark" />
@@ -39,29 +39,47 @@ function Sidebar({ onLogout }) {
 
       {/* admin */}
       {isAdmin && (
-        <nav className="side-actions side-actions--admin" aria-label="Secciones de administración">
-          <Link className="side-btn" title="Gestión de inventario" to="/Admin/Inventario" >
+        <nav
+          className="side-actions side-actions--admin"
+          aria-label="Secciones de administración"
+        >
+          <Link
+            className="side-btn"
+            title="Gestión de inventario"
+            to="/Admin/Inventario"
+          >
             <i className="fa-solid fa-boxes-stacked" />
             <small></small>
           </Link>
 
-          <Link className="side-btn" title="Gestión de reservas" to="/Admin/Reservas" >
+          <Link
+            className="side-btn"
+            title="Gestión de reservas"
+            to="/Admin/Reservas"
+          >
             <i className="fa-solid fa-calendar-check" />
             <small></small>
           </Link>
 
-          <Link className="side-btn" title="Gestión de usuarios" to="/Admin/Usuarios" >
-            <i className="fa-solid fa-users-gear" />
+          <Link
+            className="side-btn"
+            title="Gestión de préstamos"
+            to="/Admin/Prestamos"
+          >
+            <i className="fa-solid fa-hand-holding-heart" />
             <small></small>
           </Link>
 
-          <Link className="side-btn" title="Gestión de préstamos" to="/Admin/Prestamos" >
-            <i className="fa-solid fa-hand-holding-heart" />
+          <Link
+            className="side-btn"
+            title="Gestión de usuarios"
+            to="/Admin/Usuarios"
+          >
+            <i className="fa-solid fa-users-gear" />
             <small></small>
           </Link>
         </nav>
       )}
-
 
       <div className="side-tools">
         <Link className="tool" title="Cuenta" to="/Cuenta">

@@ -13,7 +13,7 @@ router.post(
   isAdmin,
   PrestamoController.create,
 );
-router.post(
+router.patch(
   "/devolver/:idPrestamo",
   verifyToken,
   isAdmin,
