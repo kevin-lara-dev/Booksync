@@ -6,6 +6,7 @@ import {
   confirmReservaAdmin,
   cancelReservaAdmin,
 } from "../../services/reserva.service";
+import { crearPrestamo } from "../../services/prestamo.service";
 
 const ITEMS_POR_PAGINA = 10;
 
@@ -229,6 +230,23 @@ function ReservasAdmin() {
     setSelectedIds([]);
   };
 
+  const handleCrearPrestamo = async (idReserva) => {
+    try {
+      const res = await crearPrestamo(idReserva);
+      setReservas((prev) =>
+        prev.map((r) =>
+          r.id_reserva === idReserva ? { ...r, estado: "prestada" } : r,
+        ),
+      );
+      showToast("Préstamo", res.message || "Préstamo creado correctamente");
+    } catch (error) {
+      showToast(
+        "Error",
+        error?.response?.data?.message || "Error creando préstamo",
+      );
+    }
+  };
+
   const handleNuevaReserva = () =>
     showToast("Aviso", "Esta acción se puede implementar después.");
   const handleHistorial = () =>
@@ -417,9 +435,14 @@ function ReservasAdmin() {
                               </button>
                             </>
                           ) : res.estado === "confirmada" ? (
-                            <span title="Lista para crear préstamo">
+                            <button
+                              type="button"
+                              className="row-action"
+                              title="Crear préstamo"
+                              onClick={() => handleCrearPrestamo(res.id_reserva)}
+                            >
                               <i className="fa-solid fa-book-open-reader" />
-                            </span>
+                            </button>
                           ) : (
                             <span title="Sin acciones disponibles">
                               <i className="fa-solid fa-minus" />

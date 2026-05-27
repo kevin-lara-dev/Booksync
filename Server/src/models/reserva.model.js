@@ -221,7 +221,7 @@ class Reserva {
     try {
       await conn.beginTransaction();
 
-      this.expireReservas(conn);
+      await this.expireReservas(conn);
 
       const [[reserva]] = await conn.query(
         `

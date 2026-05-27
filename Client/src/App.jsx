@@ -14,6 +14,7 @@ import Account from "./pages/dashboard/Account.jsx";
 import InventarioAdmin from "./pages/Admin/InventarioAdmin.jsx";
 import ReservasAdmin from "./pages/Admin/ReservasAdmin.jsx";
 import UsuariosAdmin from "./pages/Admin/UsuariosAdmin.jsx";
+import PrestamosAdmin from "./pages/Admin/PrestamosAdmin.jsx";
 
 import { AdminRoute } from "./components/AdminRoute.jsx";
 
@@ -57,6 +58,16 @@ function App() {
           <AdminRoute>
             {" "}
             <UsuariosAdmin />{" "}
+          </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/Admin/Prestamos"
+        element={
+          <AdminRoute>
+            {" "}
+            <PrestamosAdmin />{" "}
           </AdminRoute>
         }
       />

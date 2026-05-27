@@ -54,6 +54,11 @@ function Sidebar({ onLogout }) {
             <i className="fa-solid fa-users-gear" />
             <small></small>
           </Link>
+
+          <Link className="side-btn" title="Gestión de préstamos" to="/Admin/Prestamos" >
+            <i className="fa-solid fa-hand-holding-heart" />
+            <small></small>
+          </Link>
         </nav>
       )}
 
