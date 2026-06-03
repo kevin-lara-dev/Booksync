@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { registerRequest } from "../../services/auth.service";
-import Swal from "sweetalert2";
+import { useToast } from "../../hooks/useToast";
 
 
 
@@ -20,6 +20,7 @@ function Register() {
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const { toast, showToast } = useToast();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -58,103 +59,33 @@ function Register() {
       !password ||
       !passwordConfirmed
     ) {
-      Swal.fire({
-        text: "Por favor completa todos los campos",
-        icon: "error",
-        toast: true,
-        position: "top",
-        showConfirmButton: false,
-        timer: 1500,
-        timerProgressBar: true,
-        background: "#fff",
-        iconColor: "#e74c3c",
-        customClass: {
-          popup: "burbuja-mini",
-          icon: "icono-pequeno",
-        },
-      });
+      showToast("Error", "Por favor completa todos los campos");
       return;
     }
 
     if (password.length < 6) {
-      Swal.fire({
-        text: "La contraseña debe tener al menos 6 caracteres",
-        icon: "error",
-        toast: true,
-        position: "top",
-        showConfirmButton: false,
-        timer: 1500,
-        timerProgressBar: true,
-        background: "#fff",
-        iconColor: "#e74c3c",
-        customClass: {
-          popup: "burbuja-mini",
-          icon: "icono-pequeno",
-        },
-      });
+      showToast("Error", "La contraseña debe tener al menos 6 caracteres");
       return;
     }
 
     if (password !== passwordConfirmed) {
-      Swal.fire({
-        text: "Las contraseñas no coinciden",
-        icon: "error",
-        toast: true,
-        position: "top",
-        showConfirmButton: false,
-        timer: 1500,
-        timerProgressBar: true,
-        background: "#fff",
-        iconColor: "#e74c3c",
-        customClass: {
-          popup: "burbuja-mini",
-          icon: "icono-pequeno",
-        },
-      });
+      showToast("Error", "Las contraseñas no coinciden");
       return;
     }
 
     if (!/^\d+$/.test(numero_documento)) {
-      Swal.fire({
-        text: "El número de identificación debe contener solo dígitos.",
-        icon: "error",
-        toast: true,
-        position: "top",
-        showConfirmButton: false,
-        timer: 1500,
-        timerProgressBar: true,
-        background: "#fff",
-        iconColor: "#e74c3c",
-        customClass: {
-          popup: "burbuja-mini",
-          icon: "icono-pequeno",
-        },
-      });
+      showToast("Error", "El número de identificación debe contener solo dígitos.");
       return;
     }
 
     const birthDate = new Date(fecha_nacimiento);
     const today = new Date();
     if (birthDate > today) {
-      Swal.fire({
-        text: "La fecha de nacimiento no puede ser futura.",
-        icon: "error",
-        toast: true,
-        position: "top",
-        showConfirmButton: false,
-        timer: 1500,
-        timerProgressBar: true,
-        background: "#fff",
-        iconColor: "#e74c3c",
-        customClass: {
-          popup: "burbuja-mini",
-          icon: "icono-pequeno",
-        },
-      });
+      showToast("Error", "La fecha de nacimiento no puede ser futura.");
       return;
     }
 
-    // conectar con el backend 
+    // conectar con el backend
     try {
       const payload = {
         nombre: form.nombre,
@@ -168,21 +99,7 @@ function Register() {
 
       await registerRequest(payload);
 
-      Swal.fire({
-        text: "Registro exitoso. Ahora puedes iniciar sesión",
-        icon: "success",
-        toast: true,
-        position: "top",
-        showConfirmButton: false,
-        timer: 2000,
-        timerProgressBar: true,
-        background: "#fff",
-        iconColor: "#2ecc71",
-        customClass: {
-          popup: "burbuja-mini",
-          icon: "icono-pequeno",
-        },
-      });
+      showToast("Listo", "Registro exitoso. Ahora puedes iniciar sesión");
 
       setTimeout(() => {
         navigate("/Home");
@@ -190,21 +107,7 @@ function Register() {
 
     } catch (error) {
       console.error(error);
-      Swal.fire({
-        text: error.response?.data?.message || "Error al registrar el usuario",
-        icon: "error",
-        toast: true,
-        position: "top",
-        showConfirmButton: false,
-        timer: 1500,
-        timerProgressBar: true,
-        background: "#fff",
-        iconColor: "#e74c3c",
-        customClass: {
-          popup: "burbuja-mini",
-          icon: "icono-pequeno",
-        },
-      });
+      showToast("Error", error.response?.data?.message || "Error al registrar el usuario");
     }
   };
 
@@ -391,6 +294,7 @@ function Register() {
           </form>
         </section>
       </div>
+      {toast}
     </main>
   );
 }

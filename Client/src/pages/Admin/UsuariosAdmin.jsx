@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import Sidebar from "../../components/sidebar";
 import { useLogoutToast } from "../../hooks/useLogoutToast";
+import { useToast } from "../../hooks/useToast";
 import {
   getAllUsers,
   changeUserStatus,
@@ -17,7 +18,8 @@ function UsuariosAdmin() {
   const [statusFilter, setStatusFilter] = useState("todos");
   const [actionLoading, setActionLoading] = useState(null);
 
-  const { toast, openToast } = useLogoutToast();
+  const { toast: logoutToast, openToast } = useLogoutToast();
+  const { toast: feedbackToast, showToast } = useToast();
 
   // ── Cargar usuarios ───────────────────────────────────────────
   const fetchUsers = useCallback(async () => {
@@ -50,18 +52,7 @@ function UsuariosAdmin() {
         ),
       );
     } catch (err) {
-      Swal.fire({
-        text: "Error al cambiar estado del usuario.",
-        icon: "error",
-        toast: true,
-        position: "top",
-        showConfirmButton: false,
-        timer: 2000,
-        timerProgressBar: true,
-        background: "#fff",
-        iconColor: "#e74c3c",
-        customClass: { popup: "burbuja-mini", icon: "icono-pequeno" },
-      });
+      showToast("Error", "Error al cambiar estado del usuario.");
       console.error(err);
     } finally {
       setActionLoading(null);
@@ -95,31 +86,9 @@ function UsuariosAdmin() {
           u.id_usuario === user.id_usuario ? { ...u, tipo: nuevoRol } : u,
         ),
       );
-      Swal.fire({
-        text: `Rol actualizado a "${nuevoRol}".`,
-        icon: "success",
-        toast: true,
-        position: "top",
-        showConfirmButton: false,
-        timer: 2000,
-        timerProgressBar: true,
-        background: "#fff",
-        iconColor: "#2ecc71",
-        customClass: { popup: "burbuja-mini", icon: "icono-pequeno" },
-      });
+      showToast("Listo", `Rol actualizado a "${nuevoRol}".`);
     } catch (err) {
-      Swal.fire({
-        text: "Error al cambiar rol del usuario.",
-        icon: "error",
-        toast: true,
-        position: "top",
-        showConfirmButton: false,
-        timer: 2000,
-        timerProgressBar: true,
-        background: "#fff",
-        iconColor: "#e74c3c",
-        customClass: { popup: "burbuja-mini", icon: "icono-pequeno" },
-      });
+      showToast("Error", "Error al cambiar rol del usuario.");
       console.error(err);
     } finally {
       setActionLoading(null);
@@ -325,7 +294,8 @@ function UsuariosAdmin() {
               </button>
             </footer>
           </section>
-          {toast}
+          {logoutToast}
+          {feedbackToast}
         </main>
       </div>
     </div>

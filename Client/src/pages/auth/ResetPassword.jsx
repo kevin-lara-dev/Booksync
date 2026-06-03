@@ -34,9 +34,8 @@ const handleSubmit = (e) => {
         return;
     };
 
-     //llamar al backend: POST /reset-password { token, password }
-    alert("Contraseña actualizada correctamente (simulado).");
-    navigate("/home"); 
+    // TODO: conectar con backend POST /reset-password { token, password }
+    navigate("/");
 };
 
 return (

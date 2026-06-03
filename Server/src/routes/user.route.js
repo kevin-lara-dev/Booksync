@@ -13,6 +13,8 @@ router.get("/profile", verifyToken, UserController.getProfile)
 
 router.put("/profile", verifyToken, UserController.updateProfile)
 
+router.patch("/profile/password", verifyToken, UserController.changePassword)
+
 router.patch("/:id/status", verifyToken, isAdmin, UserController.changeStatus)
 
 router.patch("/:id/role", verifyToken, isAdmin, UserController.changeRole)

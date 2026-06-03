@@ -17,6 +17,7 @@ import UsuariosAdmin from "./pages/Admin/UsuariosAdmin.jsx";
 import PrestamosAdmin from "./pages/Admin/PrestamosAdmin.jsx";
 
 import { AdminRoute } from "./components/AdminRoute.jsx";
+import { PrivateRoute } from "./components/PrivateRoute.jsx";
 
 function App() {
   return (
@@ -25,13 +26,62 @@ function App() {
       <Route path="/Register" element={<Register />} />
       <Route path="/Help" element={<Help />} />
       <Route path="/Forgot" element={<Forgot />} />
-      <Route path="/Reset" element={<Reset />} />
-      <Route path="/Home" element={<Home />} />
-      <Route path="/Detalle/:id" element={<Detalle />} />
-      <Route path="/Reservas" element={<ReservasUsuario />} />
-      <Route path="/Prestamos" element={<PrestamosUsuarios />} />
-      <Route path="/Favoritos" element={<Favorites />} />
-      <Route path="/Cuenta" element={<Account />} />
+      <Route
+        path="/Reset"
+        element={
+          <PrivateRoute>
+            <Reset />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/Home"
+        element={
+          <PrivateRoute>
+            <Home />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/Detalle/:id"
+        element={
+          <PrivateRoute>
+            <Detalle />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/Reservas"
+        element={
+          <PrivateRoute>
+            <ReservasUsuario />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/Prestamos"
+        element={
+          <PrivateRoute>
+            <PrestamosUsuarios />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/Favoritos"
+        element={
+          <PrivateRoute>
+            <Favorites />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/Cuenta"
+        element={
+          <PrivateRoute>
+            <Account />
+          </PrivateRoute>
+        }
+      />
 
       {/* ===== RUTAS ADMIN ===== */}
       <Route
@@ -73,7 +123,7 @@ function App() {
       />
 
       {/* Fallback */}
-      <Route path="*" element={<Navigate to="/Home" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

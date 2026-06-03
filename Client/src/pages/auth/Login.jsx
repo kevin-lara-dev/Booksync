@@ -1,8 +1,8 @@
-import Swal from "sweetalert2";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../hooks/useToast";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -12,6 +12,7 @@ function Login() {
 
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { toast, showToast } = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,21 +26,7 @@ function Login() {
 
       navigate("/Home");
     } catch (err) {
-      Swal.fire({
-        text: "Correo o contraseña incorrectos",
-        icon: "error",
-        toast: true,
-        position: "top",
-        showConfirmButton: false,
-        timer: 2000,
-        timerProgressBar: true,
-        background: "#fff",
-        iconColor: "#e74c3c",
-        customClass: {
-          popup: "burbuja-mini",
-          icon: "icono-pequeno",
-        },
-      });
+      showToast("Error", "Correo o contraseña incorrectos");
     }
   };
 
@@ -128,6 +115,7 @@ function Login() {
           </form>
         </section>
       </div>
+      {toast}
     </main>
   );
 }

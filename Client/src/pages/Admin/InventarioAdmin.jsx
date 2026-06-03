@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import Sidebar from "../../components/sidebar"
 import {useLogoutToast} from "../../hooks/useLogoutToast"
+import { useToast } from "../../hooks/useToast";
 import { getLibrosRequest, createLibro, updateLibro, deleteLibro } from "../../services/libro.service";
 import BookFormModal from "./BookFormModal";
 
@@ -38,7 +39,8 @@ function InventarioAdmin (){
         cover: ""
     })
 
-    const {toast, openToast} = useLogoutToast();
+    const {toast: logoutToast, openToast} = useLogoutToast();
+    const { toast: feedbackToast, showToast } = useToast();
 
 
 
@@ -115,9 +117,9 @@ function InventarioAdmin (){
 
         } catch (error) {
             if (error.response?.status === 409) {
-                alert("Ya existe un libro con ese ISBN");
+                showToast("Error", "Ya existe un libro con ese ISBN");
             } else {
-                alert("Error al crear el libro");
+                showToast("Error", "Error al crear el libro");
             }
         }
     };
@@ -153,23 +155,23 @@ function InventarioAdmin (){
             fetchLibros();
         } catch (error) {
             console.error(error);
-            alert("Error al eliminar el libro")
+            showToast("Error", "Error al eliminar el libro")
         }
     }
 
 
     const handleImport = () => {
-        alert("Simulación: importar inventario (CSV / Excel)")
+        showToast("Próximamente", "Importar inventario estará disponible pronto")
     };
 
 
     const handleExport = () => {
-        alert("Simulación: exportar inventario (CSV / Excel)"); 
+        showToast("Próximamente", "Exportar inventario estará disponible pronto");
     };
 
 
     const handleBulkAction = (action) => {
-        alert(`Simulación acción masiva: ${action}`);
+        showToast("Próximamente", "Las acciones masivas estarán disponibles pronto");
     };
 
 
@@ -392,7 +394,8 @@ function InventarioAdmin (){
                             </div>
                         </footer>
                     </section>
-                    {toast}
+                    {logoutToast}
+                    {feedbackToast}
                 </main>
             </div>
         </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Sidebar from "../../components/sidebar";
 import { useLogoutToast } from "../../hooks/useLogoutToast";
+import { useToast } from "../../hooks/useToast";
 import { useAuth } from "../../context/AuthContext";
 import {
   getProfile,
@@ -10,19 +11,10 @@ import {
 } from "../../services/user.service";
 import Swal from "sweetalert2";
 
-const TOAST_BASE = {
-  toast: true,
-  position: "top",
-  showConfirmButton: false,
-  timer: 2500,
-  timerProgressBar: true,
-  background: "#fff",
-  customClass: { popup: "burbuja-mini", icon: "icono-pequeno" },
-};
-
 function Account() {
   const { logout } = useAuth();
-  const { toast, openToast } = useLogoutToast();
+  const { toast: logoutToast, openToast } = useLogoutToast();
+  const { toast: feedbackToast, showToast } = useToast();
 
   const [perfil, setPerfil] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -79,9 +71,9 @@ function Account() {
     e.preventDefault();
     try {
       await updateProfile(formData);
-      Swal.fire({ ...TOAST_BASE, text: "Perfil actualizado correctamente", icon: "success", iconColor: "#2ecc71" });
+      showToast("Listo", "Perfil actualizado correctamente");
     } catch (err) {
-      Swal.fire({ ...TOAST_BASE, text: err?.response?.data?.message || "Error al actualizar perfil", icon: "error", iconColor: "#e74c3c" });
+      showToast("Error", err?.response?.data?.message || "Error al actualizar perfil");
     }
   };
 
@@ -89,21 +81,21 @@ function Account() {
     e.preventDefault();
 
     if (!passwords.current || !passwords.next || !passwords.confirm) {
-      Swal.fire({ ...TOAST_BASE, text: "Completa todos los campos de contraseña", icon: "error", iconColor: "#e74c3c" });
+      showToast("Error", "Completa todos los campos de contraseña");
       return;
     }
     if (passwords.next !== passwords.confirm) {
-      Swal.fire({ ...TOAST_BASE, text: "Las contraseñas nuevas no coinciden", icon: "error", iconColor: "#e74c3c" });
+      showToast("Error", "Las contraseñas nuevas no coinciden");
       return;
     }
 
     setSavingPassword(true);
     try {
       await changePassword(passwords.current, passwords.next);
-      Swal.fire({ ...TOAST_BASE, text: "Contraseña actualizada correctamente", icon: "success", iconColor: "#2ecc71" });
+      showToast("Listo", "Contraseña actualizada correctamente");
       setPasswords({ current: "", next: "", confirm: "" });
     } catch (err) {
-      Swal.fire({ ...TOAST_BASE, text: err?.response?.data?.message || "Error al cambiar contraseña", icon: "error", iconColor: "#e74c3c" });
+      showToast("Error", err?.response?.data?.message || "Error al cambiar contraseña");
     } finally {
       setSavingPassword(false);
     }
@@ -268,7 +260,8 @@ function Account() {
             </div>
           </div>
         </div>
-        {toast}
+        {logoutToast}
+        {feedbackToast}
       </div>
     </div>
   );

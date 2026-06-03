@@ -60,7 +60,7 @@ function Favorites() {
       await deleteFavorite(idLibro);
       setFavorites((prev) => prev.filter((l) => l.id_libro !== idLibro));
     } catch (error) {
-      alert(error?.response?.data?.message || "Error quitando favorito");
+      showToast("Error", error?.response?.data?.message || "Error quitando favorito");
     }
   };
 
