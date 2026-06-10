@@ -202,7 +202,7 @@ npm run dev
 
 ## 👤 Autor
 
-**Kevin Esteven**
+**Kevin Steven**
 
 - Email: kevinesteven0627@gmail.com
 - Tel: 3124046821
