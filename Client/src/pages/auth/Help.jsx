@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 function Help (){
     function handleSubmit (e){
         e.preventDefault();
-        console.log("formulario enviado")
     }
 
     return (

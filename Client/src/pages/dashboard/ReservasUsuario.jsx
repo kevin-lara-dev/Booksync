@@ -57,7 +57,6 @@ function ReservasUsuario() {
         );
         setReservas(reservasFiltradas);
       } catch (error) {
-        console.error("Error al cargar reservas: ", error);
         setReservas([]);
       } finally {
         setLoading(false);

@@ -85,7 +85,6 @@ function Register() {
       return;
     }
 
-    // conectar con el backend
     try {
       const payload = {
         nombre: form.nombre,
@@ -106,7 +105,6 @@ function Register() {
       }, 2000);
 
     } catch (error) {
-      console.error(error);
       showToast("Error", error.response?.data?.message || "Error al registrar el usuario");
     }
   };

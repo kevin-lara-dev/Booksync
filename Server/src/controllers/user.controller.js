@@ -3,58 +3,48 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/user.model");
 
 class UserController {
+
   //OBTENEMOS PERFIL
   static async getProfile(req, res) {
     try {
+      // req.user.id me lo deja el middleware verifyToken después de leer el token
       const userId = req.user.id;
 
       const user = await User.findById(userId);
 
       if (!user) {
-        return res.status(404).json({
-          message: "Usuario no encontrado",
-        });
+        return res.status(404).json({ message: "Usuario no encontrado" });
       }
 
+      // borro el hash antes de mandar el objeto, no quiero exponer eso al cliente
       delete user.password_hash;
 
       res.json(user);
     } catch (error) {
-      console.error(error);
-      res.status(500).json({
-        message: "Error en encontrar el perfil",
-      });
+      res.status(500).json({ message: "Error en encontrar el perfil" });
     }
   }
 
-  // userAll solo para admin
+
+  // userAll — solo para admin, isAdmin lo valida en la ruta
   static async getAllUsers(req, res) {
     try {
       const usuarios = await User.getAllUsers();
-
       return res.json(usuarios);
     } catch (error) {
-      console.error(error);
-      res.status(500).json({
-        message: "Error al obtener usuarios",
-      });
+      res.status(500).json({ message: "Error al obtener usuarios" });
     }
   }
+
 
   //Actualizamos perfil
   static async updateProfile(req, res) {
     try {
       const userId = req.user.id;
-      const dataToUpdate = {};
 
-      const {
-        nombre,
-        apellido,
-        correo,
-        fecha_nacimiento,
-        tipo_documento,
-        numero_documento,
-      } = req.body;
+      // armo el objeto solo con los campos que llegaron, no piso lo que no se envió
+      const dataToUpdate = {};
+      const { nombre, apellido, correo, fecha_nacimiento, tipo_documento, numero_documento } = req.body;
 
       if (nombre) dataToUpdate.nombre = nombre;
       if (apellido) dataToUpdate.apellido = apellido;
@@ -63,98 +53,75 @@ class UserController {
       if (tipo_documento) dataToUpdate.tipo_documento = tipo_documento;
       if (numero_documento) dataToUpdate.numero_documento = numero_documento;
 
+      // si el body llegó vacío no tiene sentido ir a la bd
       if (Object.keys(dataToUpdate).length === 0) {
-        return res.status(400).json({
-          message: "No se enviaron datos para actualizar",
-        });
+        return res.status(400).json({ message: "No se enviaron datos para actualizar" });
       }
 
       const updated = await User.update(userId, dataToUpdate);
 
       if (!updated) {
-        return res.status(404).json({
-          message: "Usuario no encontrado",
-        });
+        return res.status(404).json({ message: "Usuario no encontrado" });
       }
 
-      return res.status(200).json({
-        message: "Perfil actualizado exitosamente",
-      });
+      return res.status(200).json({ message: "Perfil actualizado exitosamente" });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({
-        message: "Error al actualizar perfil",
-      });
+      res.status(500).json({ message: "Error al actualizar perfil" });
     }
   }
+
 
   //ACTUALIZAMOS ESTADO
   static async changeStatus(req, res) {
     try {
       const { id } = req.params;
-      const { estado } = req.body;
+      const { estado } = req.body; // "activo" o "inactivo"
 
       if (!estado) {
-        return res.status(400).json({
-          message: "El estado es obligatorio",
-        });
+        return res.status(400).json({ message: "El estado es obligatorio" });
       }
 
       const updated = await User.updateStatus(id, estado);
 
       if (!updated) {
-        return res.status(404).json({
-          message: "Usuario no encontrado",
-        });
+        return res.status(404).json({ message: "Usuario no encontrado" });
       }
 
-      return res.status(200).json({
-        message: "Estado actualizado correctamente",
-      });
+      return res.status(200).json({ message: "Estado actualizado correctamente" });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({
-        message: "Error al cambiar estado",
-      });
+      return res.status(500).json({ message: "Error al cambiar estado" });
     }
   }
 
-  //ACTUALIZAMOS TIPO DE USUARIO (con el tiempo agregar validacion para dejar minimo un admin)
+
+  //ACTUALIZAMOS TIPO DE USUARIO
+  // TODO: validar que siempre quede al menos un administrador en el sistema
   static async changeRole(req, res) {
     try {
       const { id } = req.params;
       const { tipo } = req.body;
 
       if (!tipo) {
-        return res.status(400).json({
-          message: "El tipo es obligatorio",
-        });
+        return res.status(400).json({ message: "El tipo es obligatorio" });
       }
 
+      // no dejo que el admin se cambie el rol a sí mismo, pa que no quede bloqueado
       if (req.user.id == id) {
-        return res.status(400).json({
-          message: "No puedes cambiar tu propio rol",
-        });
+        return res.status(400).json({ message: "No puedes cambiar tu propio rol" });
       }
 
       const update = await User.updateRole(id, tipo);
 
       if (!update) {
-        return res.status(404).json({
-          message: "Usuario no encontrado",
-        });
+        return res.status(404).json({ message: "Usuario no encontrado" });
       }
 
-      return res.status(200).json({
-        message: "Rol actualizado correctamente",
-      });
+      return res.status(200).json({ message: "Rol actualizado correctamente" });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({
-        message: "Error al cambiar rol",
-      });
+      return res.status(500).json({ message: "Error al cambiar rol" });
     }
   }
+
 
   //CAMBIAR CONTRASEÑA
   static async changePassword(req, res) {
@@ -163,32 +130,23 @@ class UserController {
       const { passwordActual, passwordNueva } = req.body;
 
       if (!passwordActual || !passwordNueva) {
-        return res.status(400).json({
-          message: "Ambas contraseñas son obligatorias",
-        });
+        return res.status(400).json({ message: "Ambas contraseñas son obligatorias" });
       }
 
       if (passwordNueva.length < 6) {
-        return res.status(400).json({
-          message: "La nueva contraseña debe tener mínimo 6 caracteres",
-        });
+        return res.status(400).json({ message: "La nueva contraseña debe tener mínimo 6 caracteres" });
       }
 
-      // Buscar usuario
       const user = await User.findById(userId);
 
       if (!user) {
-        return res.status(404).json({
-          message: "Usuario no encontrado",
-        });
+        return res.status(404).json({ message: "Usuario no encontrado" });
       }
 
+      // confirmo que sí sepa su contraseña actual antes de dejarla cambiar
       const isMatch = await bcrypt.compare(passwordActual, user.password_hash);
-
       if (!isMatch) {
-        return res.status(401).json({
-          message: "La contraseña actual es incorrecta",
-        });
+        return res.status(401).json({ message: "La contraseña actual es incorrecta" });
       }
 
       const newHashedPassword = await bcrypt.hash(passwordNueva, 10);
@@ -196,23 +154,17 @@ class UserController {
       const updated = await User.updatePassword(userId, newHashedPassword);
 
       if (!updated) {
-        return res.status(500).json({
-          message: "No se pudo actualizar la contraseña",
-        });
+        return res.status(500).json({ message: "No se pudo actualizar la contraseña" });
       }
 
-      return res.status(200).json({
-        message: "Contraseña actualizada correctamente",
-      });
+      return res.status(200).json({ message: "Contraseña actualizada correctamente" });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({
-        message: "Error al cambiar contraseña",
-      });
+      return res.status(500).json({ message: "Error al cambiar contraseña" });
     }
   }
 
-  //BORRAMOS UNA CUENTA /DESACTIVAMOS
+
+  //BORRAMOS UNA CUENTA — en realidad es soft delete, solo lo pone inactivo en la bd
   static async deleteProfile(req, res) {
     try {
       const userId = req.user.id;
@@ -220,19 +172,12 @@ class UserController {
       const deleted = await User.delete(userId);
 
       if (!deleted) {
-        return res.status(404).json({
-          message: "Usuario no encontrado",
-        });
+        return res.status(404).json({ message: "Usuario no encontrado" });
       }
 
-      return res.json({
-        message: "Usuario eliminado exitosamente",
-      });
+      return res.json({ message: "Usuario eliminado exitosamente" });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({
-        message: "Error al borrar usuario",
-      });
+      res.status(500).json({ message: "Error al borrar usuario" });
     }
   }
 }

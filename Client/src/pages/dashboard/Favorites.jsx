@@ -72,7 +72,6 @@ function Favorites() {
 
         setFavorites(data.favorite || []);
       } catch (error) {
-        console.error("Error cargando favoritos:", error);
         setFavorites([]);
       } finally {
         setLoading(false);

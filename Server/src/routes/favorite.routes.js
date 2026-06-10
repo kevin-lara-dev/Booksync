@@ -1,17 +1,22 @@
 const express = require("express");
-const FavoritoController = require("../controllers/favorite.controller")
-const verifyToken = require("../middlewares/auth.middleware")
+const FavoritoController = require("../controllers/favorite.controller");
+const verifyToken = require("../middlewares/auth.middleware");
 
 const router = express.Router();
 
-router.get("/", verifyToken, FavoritoController.getFavorites)
+// todos mis favoritos con datos del libro
+router.get("/", verifyToken, FavoritoController.getFavorites);
 
-router.get("/ids", verifyToken, FavoritoController.getFavoritesId)
+// solo los ids — pa saber qué corazones pintar activos en el ui sin traer todo
+router.get("/ids", verifyToken, FavoritoController.getFavoritesId);
 
-router.get("/:idLibro", verifyToken, FavoritoController.isFavorite)
+// verificar si un libro específico ya está en mis favoritos
+router.get("/:idLibro", verifyToken, FavoritoController.isFavorite);
 
-router.post("/:idLibro", verifyToken, FavoritoController.addFavorite)
+// agregar a favoritos
+router.post("/:idLibro", verifyToken, FavoritoController.addFavorite);
 
-router.delete("/:idLibro", verifyToken, FavoritoController.deleteFavorite); 
+// quitar de favoritos
+router.delete("/:idLibro", verifyToken, FavoritoController.deleteFavorite);
 
 module.exports = router;

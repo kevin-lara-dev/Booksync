@@ -1,18 +1,18 @@
 import api from "./api";
 
-//Listar reservas
+// mis reservas
 export const getReservas = async () => {
   const { data } = await api.get(`/reservas/mis`);
   return data;
 };
 
-//Crear reserva
+// crear reserva — el back verifica disponibilidad antes de crearla
 export const createReserva = async (idLibro) => {
   const { data } = await api.post(`/reservas/${idLibro}`);
   return data;
 };
 
-//Cancelar reserva
+// cancelar una de mis reservas
 export const deleteReserva = async (idReserva) => {
   const { data } = await api.delete(`/reservas/${idReserva}`);
   return data;
@@ -22,19 +22,19 @@ export const deleteReserva = async (idReserva) => {
 // ADMIN RESERVAS
 // ============================
 
-//Listar reservas admin
+// todas las reservas del sistema
 export const getReservasAdmin = async () => {
   const { data } = await api.get("/reservas/admin");
   return data;
 };
 
-//Confirmar reserva admin
+// aprobar una reserva pa que el usuario pueda retirar el libro
 export const confirmReservaAdmin = async (idReserva) => {
   const { data } = await api.patch(`/reservas/admin/${idReserva}/confirmar`);
   return data;
 };
 
-//Cancelar reserva admin
+// cancelar una reserva desde el panel admin
 export const cancelReservaAdmin = async (idReserva) => {
   const { data } = await api.patch(`/reservas/admin/${idReserva}/cancelar`);
   return data;

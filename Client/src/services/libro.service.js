@@ -1,25 +1,23 @@
-import api from "./api"
+import api from "./api";
 
-//LISTAR LIBROS
+//LISTAR LIBROS — devuelve { total, libros }
 export const getLibrosRequest = async () => {
-    const response = await api.get("/libros")
-
-    return response.data
-}  
+  const response = await api.get("/libros");
+  return response.data;
+};
 
 //CREAR LIBROS
 export const createLibro = async (data) => {
-    const response = await api.post("/libros", data);
+  const response = await api.post("/libros", data);
+  return response.data;
+};
 
-    return response.data 
-}
-
-//ACTUALIZAR LIBROS
+//ACTUALIZAR LIBROS — acepta cambios parciales
 export const updateLibro = (id, data) => {
-    return api.put(`/libros/${id}`, data)
-}
+  return api.put(`/libros/${id}`, data);
+};
 
-//BORRAR LIBROS
+//BORRAR LIBROS — soft delete, no desaparece de la bd
 export const deleteLibro = (id) => {
-    return api.delete(`/libros/${id}`)
-}
+  return api.delete(`/libros/${id}`);
+};

@@ -49,7 +49,6 @@ function Home() {
       setLibros(data.libros || [])
       
     } catch (error) {
-      console.error("Error al obtener libros:", error);
     }
   }
   
@@ -90,7 +89,6 @@ function Home() {
       setRecentBooks(sorted);
       setCurrentIndex(0);
       } catch (error) {
-        console.error("Error al obtener libros recientes:", error);
       }
     }
     fetchRecentBooks();
@@ -145,7 +143,6 @@ function Home() {
       setGenres(data.genres || []);
 
       } catch (error) {
-        console.error("Error al obtener géneros:", error);
       }
     }
 

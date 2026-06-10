@@ -4,6 +4,7 @@ import {useLogoutToast} from "../../hooks/useLogoutToast"
 import { useToast } from "../../hooks/useToast";
 import { getLibrosRequest, createLibro, updateLibro, deleteLibro } from "../../services/libro.service";
 import BookFormModal from "./BookFormModal";
+import Swal from "sweetalert2";
 
 
 const initialFormState = {
@@ -49,7 +50,6 @@ function InventarioAdmin (){
             const data = await getLibrosRequest();
             setbooks(data.libros || []);
         } catch (error) {
-            console.error("Error al obtener libros", error);
         } finally {
             setLoading(false)
         }
@@ -146,15 +146,26 @@ function InventarioAdmin (){
 
     //BORRAMOS BOOK
     const handleDeleteBook = async (book) => {
-        const confirmDelete = window.confirm(`Seguro que desea eliminar el libro ${book.title}?`);
+        const { isConfirmed } = await Swal.fire({
+            title: "¿Eliminar libro?",
+            text: `"${book.title}" será eliminado del inventario.`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sí, eliminar",
+            cancelButtonText: "Cancelar",
+            background: "#fef6e1",
+            color: "#2b1b0b",
+            confirmButtonColor: "#b31313",
+            cancelButtonColor: "#9e8c78",
+            customClass: { popup: "swal-confirm-booksync" },
+        });
 
-        if(!confirmDelete) return; 
+        if (!isConfirmed) return;
 
         try {
             await deleteLibro(book.id_libro);
             fetchLibros();
         } catch (error) {
-            console.error(error);
             showToast("Error", "Error al eliminar el libro")
         }
     }

@@ -34,7 +34,6 @@ const handleSubmit = (e) => {
         return;
     };
 
-    // TODO: conectar con backend POST /reset-password { token, password }
     navigate("/");
 };
 

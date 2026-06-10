@@ -30,7 +30,6 @@ function UsuariosAdmin() {
       setUsers(Array.isArray(data) ? data : []);
     } catch (err) {
       setError("No se pudieron cargar los usuarios.");
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -53,7 +52,6 @@ function UsuariosAdmin() {
       );
     } catch (err) {
       showToast("Error", "Error al cambiar estado del usuario.");
-      console.error(err);
     } finally {
       setActionLoading(null);
     }
@@ -89,7 +87,6 @@ function UsuariosAdmin() {
       showToast("Listo", `Rol actualizado a "${nuevoRol}".`);
     } catch (err) {
       showToast("Error", "Error al cambiar rol del usuario.");
-      console.error(err);
     } finally {
       setActionLoading(null);
     }

@@ -4,4 +4,7 @@ Client/dist
 Server/node_modules
 Server/dist
 
+Server/.env
+.env
+
 git config core.autocrlf input

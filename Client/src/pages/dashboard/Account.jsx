@@ -49,7 +49,6 @@ function Account() {
           numero_documento: data.numero_documento || "",
         });
       } catch (err) {
-        console.error("Error al cargar perfil:", err);
       } finally {
         setLoading(false);
       }
@@ -119,7 +118,6 @@ function Account() {
         try {
           await deleteProfile();
         } catch (err) {
-          console.error(err);
         } finally {
           logout();
         }
