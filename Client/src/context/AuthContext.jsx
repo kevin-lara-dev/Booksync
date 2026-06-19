@@ -5,8 +5,7 @@ import { loginRequest } from "../services/auth.service";
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-
-  // leo el localStorage al arrancar pa que la sesión no se pierda si recargo la página
+  // leo el localStorage al arrancar para que la sesión no se pierda si recargo la página
   const [currentUser, setCurrentUser] = useState(() => {
     const storedUser = localStorage.getItem("user");
     return storedUser ? JSON.parse(storedUser) : null;
@@ -42,19 +41,15 @@ export function AuthProvider({ children }) {
       token,
       login,
       logout,
-      isAuthenticated: !!token,                        // true si hay token
-      isAdmin: currentUser?.role === "administrador",  // true si el rol es admin
+      isAuthenticated: !!token, // true si hay token
+      isAdmin: currentUser?.role === "administrador", // true si el rol es admin
     };
   }, [currentUser, token]);
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-// hook pa consumir el contexto — lanza error claro si lo uso fuera del AuthProvider
+// hook pa consumir el contexto — lanza error si lo uso fuera del AuthProvider
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) {

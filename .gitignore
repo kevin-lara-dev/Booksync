@@ -5,6 +5,7 @@ Server/node_modules
 Server/dist
 
 Server/.env
+Client/.env
 .env
 
 git config core.autocrlf input
