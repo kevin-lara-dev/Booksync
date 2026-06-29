@@ -95,7 +95,6 @@ class UserController {
 
 
   //ACTUALIZAMOS TIPO DE USUARIO
-  // TODO: validar que siempre quede al menos un administrador en el sistema
   static async changeRole(req, res) {
     try {
       const { id } = req.params;
@@ -108,6 +107,17 @@ class UserController {
       // no dejo que el admin se cambie el rol a sí mismo, pa que no quede bloqueado
       if (req.user.id == id) {
         return res.status(400).json({ message: "No puedes cambiar tu propio rol" });
+      }
+
+      // si van a quitarle el rol de admin a alguien, verifico que no sea el único que queda
+      if (tipo !== "administrador") {
+        const targetUser = await User.findById(id);
+        if (targetUser?.tipo === "administrador") {
+          const totalAdmins = await User.countAdmins();
+          if (totalAdmins <= 1) {
+            return res.status(400).json({ message: "Debe haber al menos un administrador en el sistema" });
+          }
+        }
       }
 
       const update = await User.updateRole(id, tipo);

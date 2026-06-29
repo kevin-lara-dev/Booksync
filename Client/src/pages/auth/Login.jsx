@@ -8,7 +8,6 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
-  const [error, setError] = useState(null);
 
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -16,7 +15,6 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
 
     try {
       await login({
@@ -108,7 +106,7 @@ function Login() {
             </div>
 
             <div className="links">
-              <Link to="/Forgot">¿Olvidaste tu contraseña?</Link>
+              <Link to="/forgot-password">¿Olvidaste tu contraseña?</Link>
               <Link to="/Help">¿Necesitas ayuda?</Link>
               <Link to="/Register">¿No tienes cuenta?</Link>
             </div>

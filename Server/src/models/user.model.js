@@ -92,6 +92,13 @@ class User {
     return result.affectedRows > 0;
   }
 
+  // cuento cuántos admins hay — lo uso en changeRole pa no dejar el sistema sin admins
+  static async countAdmins() {
+    const sql = `SELECT COUNT(*) AS total FROM usuario WHERE tipo = 'administrador'`;
+    const [rows] = await pool.query(sql);
+    return rows[0].total;
+  }
+
   // cambiar tipo de usuario
   static async updateRole(idUsuario, tipo) {
     const sql = `UPDATE usuario SET tipo = ? WHERE id_usuario = ?`;
