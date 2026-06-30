@@ -7,7 +7,7 @@
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!50503 SET NAMES utf8mb4 */;
+/*!50503 SET NAMES utf8 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -96,7 +96,7 @@ CREATE TABLE `libro` (
   `description` text,
   PRIMARY KEY (`id_libro`),
   UNIQUE KEY `isbn` (`isbn`)
-) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -240,6 +240,36 @@ INSERT INTO `reserva` VALUES (1,3,21,'2026-05-08 16:31:16','2026-05-10 00:31:16'
 UNLOCK TABLES;
 
 --
+-- Table structure for table `reset_token`
+--
+
+DROP TABLE IF EXISTS `reset_token`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `reset_token` (
+  `id_reset_token` int unsigned NOT NULL AUTO_INCREMENT,
+  `id_usuario` int unsigned NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_reset_token`),
+  UNIQUE KEY `uq_token` (`token`),
+  KEY `fk_reset_token_usuario` (`id_usuario`),
+  CONSTRAINT `fk_reset_token_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `reset_token`
+--
+
+LOCK TABLES `reset_token` WRITE;
+/*!40000 ALTER TABLE `reset_token` DISABLE KEYS */;
+INSERT INTO `reset_token` VALUES (3,19,'4fe5a741e426d8297b8e4fc2f0189675dced4a64fc7d54b1892b022cba19c3c3','2026-06-29 01:33:40','2026-06-29 05:33:39'),(4,19,'2334d58d21a4d8a0db7c29afd4ac6ad7fc3b28a26d6608f29dc0e143eaeaec6e','2026-06-29 01:34:07','2026-06-29 05:34:07'),(6,19,'4bd65c762906f4b157f67f22e14802ff13d002f608866713aa5388da714c9cd6','2026-06-29 01:49:45','2026-06-29 05:49:44');
+/*!40000 ALTER TABLE `reset_token` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `sesion`
 --
 
@@ -295,7 +325,7 @@ CREATE TABLE `usuario` (
 
 LOCK TABLES `usuario` WRITE;
 /*!40000 ALTER TABLE `usuario` DISABLE KEYS */;
-INSERT INTO `usuario` VALUES (3,'kevin','kevin@booksync.com','$2b$10$uqyNaA4u6loWe/KzCs.BCuXDS5a5UaXxarYgHoCbWNt8/jmqpHdpW','administrador','activo','Lara','CC','10700045555','2004-06-27'),(16,'Juan','juan@email.com','$2b$10$phiq74.WoO/3p3dMM6ZWb.rlQVorvevixlLzt3Dr5sIJDH.vEZSLG','usuario','inactivo','García','CC','1234567890','2000-05-15'),(17,'juanito','juanito@gmail.com','$2b$10$JFjAGFeQPX85ki2zPLbNuOljk9WGKDB4Ia6capEQsYdUzQEIHw9Zy','usuario','inactivo','perez','CC','123456789','2002-06-05'),(18,'juanita','lol@gmail.com','$2b$10$NlKt578wGV2Wo1JCifoexuop/yL51QKg3uCAEzRWVYWIvDLjf.ADu','usuario','inactivo','perez','CC','1070004611','2026-05-01'),(19,'test','kevinesteven0627@gmail.com','$2b$10$NCreFPtqrmJFFDmLELtWCO8QqdH5MYaDBFvxWgszEwrSUnn4dsLda','usuario','activo','mento','CC','0000000000000000','2026-05-11');
+INSERT INTO `usuario` VALUES (3,'kevin','kevin@booksync.com','$2b$10$uqyNaA4u6loWe/KzCs.BCuXDS5a5UaXxarYgHoCbWNt8/jmqpHdpW','administrador','activo','Lara','CC','10700045555','2004-06-27'),(16,'Juan','juan@email.com','$2b$10$phiq74.WoO/3p3dMM6ZWb.rlQVorvevixlLzt3Dr5sIJDH.vEZSLG','usuario','inactivo','García','CC','1234567890','2000-05-15'),(17,'juanito','juanito@gmail.com','$2b$10$JFjAGFeQPX85ki2zPLbNuOljk9WGKDB4Ia6capEQsYdUzQEIHw9Zy','usuario','inactivo','perez','CC','123456789','2002-06-05'),(18,'juanita','lol@gmail.com','$2b$10$NlKt578wGV2Wo1JCifoexuop/yL51QKg3uCAEzRWVYWIvDLjf.ADu','usuario','inactivo','perez','CC','1070004611','2026-05-01'),(19,'test','kevinesteven0627@gmail.com','$2b$10$LHvE6VbHoaE9YxlknI5xyOEngDY/MSOYxzFBuXSm8LTRcOnZHGsIa','usuario','activo','mento','CC','0000000000000000','2026-05-11');
 /*!40000 ALTER TABLE `usuario` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -308,4 +338,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-06-24 15:57:58
+-- Dump completed on 2026-06-30 15:52:40
