@@ -145,9 +145,48 @@ class Libro {
     //BORRAR / DESACTIVAR USUARIO
     static async delete(idLibro){
         const sql = `UPDATE libro SET status = 'inactivo' WHERE id_libro = ?`;
-    
+
         const [result] = await pool.query(sql, [idLibro]);
         return result.affectedRows > 0
+    }
+
+    // IMPORTAR LIBROS EN LOTE — inserta uno a uno pa poder reportar cuales fallaron
+    // si hiciera un INSERT masivo un solo error tiraría todo para atrás
+    static async bulkCreate(books) {
+        const results = { created: 0, errors: [] };
+
+        for (const book of books) {
+            try {
+                const sql = `
+                    INSERT INTO libro
+                    (title, author, genre, publication_year, available_quantity, location, isbn, status, cover, editorial, description)
+                    VALUES (?,?,?,?,?,?,?,'disponible',?,?,?)
+                `;
+                await pool.query(sql, [
+                    book.title,
+                    book.author,
+                    book.genre         || "",
+                    book.publication_year || null,
+                    book.available_quantity || 0,
+                    book.location      || "",
+                    book.isbn,
+                    book.cover         || "",
+                    book.editorial     || "",
+                    book.description   || "",
+                ]);
+                results.created++;
+            } catch (error) {
+                // ER_DUP_ENTRY = isbn duplicado, reporto pero sigo con los demás
+                results.errors.push({
+                    isbn: book.isbn,
+                    message: error.code === "ER_DUP_ENTRY"
+                        ? "ISBN duplicado"
+                        : error.message,
+                });
+            }
+        }
+
+        return results;
     }
 }
 

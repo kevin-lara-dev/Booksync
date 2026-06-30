@@ -3,6 +3,22 @@ jest.mock('../src/models/user.model', () => ({
     create: jest.fn()
 }));
 
+jest.mock('../src/models/reset_token.model', () => ({
+    createToken: jest.fn(),
+    findByToken: jest.fn(),
+    deleteByToken: jest.fn()
+}));
+
+jest.mock('../src/utils/emailTemplates', () => ({
+    resetPasswordTemplate: jest.fn(() => '<html>mock</html>')
+}));
+
+jest.mock('nodemailer', () => ({
+    createTransport: jest.fn(() => ({
+        sendMail: jest.fn().mockResolvedValue({ messageId: 'mock-id' })
+    }))
+}));
+
 jest.mock('bcryptjs', () => ({
     hash: jest.fn(),
     compare: jest.fn()
@@ -31,9 +47,7 @@ describe('AuthController', () => {
         jwt = require('jsonwebtoken');
         AuthController = require('../src/controllers/auth.controller');
 
-        req = {
-            body: {}
-        };
+        req = { body: {} };
 
         res = {
             status: jest.fn().mockReturnThis(),
@@ -44,10 +58,9 @@ describe('AuthController', () => {
     });
 
     describe('register', () => {
+
         test('debe retornar 400 si faltan campos obligatorios', async () => {
-            req.body = {
-                nombre: 'Kevin'
-            };
+            req.body = { nombre: 'Kevin' };
 
             await AuthController.register(req, res);
 
@@ -57,7 +70,7 @@ describe('AuthController', () => {
             });
         });
 
-        test('debe retornar 409 si el correo ya está registrado', async () => {
+        test('debe retornar 409 si el correo ya esta registrado', async () => {
             req.body = {
                 nombre: 'Kevin',
                 apellido: 'Lopez',
@@ -68,10 +81,7 @@ describe('AuthController', () => {
                 password: '123456'
             };
 
-            User.findByEmail.mockResolvedValue({
-                id_usuario: 1,
-                correo: 'kevin@test.com'
-            });
+            User.findByEmail.mockResolvedValue({ id_usuario: 1, correo: 'kevin@test.com' });
 
             await AuthController.register(req, res);
 
@@ -108,7 +118,6 @@ describe('AuthController', () => {
                 correo: 'kevin@test.com',
                 password_hash: 'hashed_password'
             });
-
             expect(res.status).toHaveBeenCalledWith(201);
             expect(res.json).toHaveBeenCalledWith({
                 message: 'Usuario creado exitosamente',
@@ -118,10 +127,9 @@ describe('AuthController', () => {
     });
 
     describe('login', () => {
-        test('debe retornar 400 si faltan correo o contraseña', async () => {
-            req.body = {
-                correo: ''
-            };
+
+        test('debe retornar 400 si faltan correo o contrasena', async () => {
+            req.body = { correo: '' };
 
             await AuthController.login(req, res);
 
@@ -132,10 +140,7 @@ describe('AuthController', () => {
         });
 
         test('debe retornar 401 si el usuario no existe', async () => {
-            req.body = {
-                correo: 'kevin@test.com',
-                password: '123456'
-            };
+            req.body = { correo: 'kevin@test.com', password: '123456' };
 
             User.findByEmail.mockResolvedValue(null);
 
@@ -143,15 +148,12 @@ describe('AuthController', () => {
 
             expect(res.status).toHaveBeenCalledWith(401);
             expect(res.json).toHaveBeenCalledWith({
-                message: 'Credenciales inválidas'
+                message: 'Credenciales invalidas'
             });
         });
 
-        test('debe retornar 403 si el usuario está inactivo', async () => {
-            req.body = {
-                correo: 'kevin@test.com',
-                password: '123456'
-            };
+        test('debe retornar 403 si el usuario esta inactivo', async () => {
+            req.body = { correo: 'kevin@test.com', password: '123456' };
 
             User.findByEmail.mockResolvedValue({
                 id_usuario: 1,
@@ -164,16 +166,11 @@ describe('AuthController', () => {
             await AuthController.login(req, res);
 
             expect(res.status).toHaveBeenCalledWith(403);
-            expect(res.json).toHaveBeenCalledWith({
-                message: 'Usuario inactivo'
-            });
+            expect(res.json).toHaveBeenCalledWith({ message: 'Usuario inactivo' });
         });
 
-        test('debe retornar 401 si la contraseña es incorrecta', async () => {
-            req.body = {
-                correo: 'kevin@test.com',
-                password: '123456'
-            };
+        test('debe retornar 401 si la contrasena es incorrecta', async () => {
+            req.body = { correo: 'kevin@test.com', password: '123456' };
 
             User.findByEmail.mockResolvedValue({
                 id_usuario: 1,
@@ -190,15 +187,12 @@ describe('AuthController', () => {
 
             expect(res.status).toHaveBeenCalledWith(401);
             expect(res.json).toHaveBeenCalledWith({
-                message: 'Credenciales inválidas'
+                message: 'Credenciales invalidas'
             });
         });
 
-        test('debe iniciar sesión correctamente y retornar token', async () => {
-            req.body = {
-                correo: 'kevin@test.com',
-                password: '123456'
-            };
+        test('debe iniciar sesion correctamente y retornar token', async () => {
+            req.body = { correo: 'kevin@test.com', password: '123456' };
 
             User.findByEmail.mockResolvedValue({
                 id_usuario: 1,
@@ -215,21 +209,14 @@ describe('AuthController', () => {
             await AuthController.login(req, res);
 
             expect(jwt.sign).toHaveBeenCalledWith(
-                {
-                    id: 1,
-                    correo: 'kevin@test.com',
-                    role: 'admin'
-                },
-                    'test_secret',
-                {
-                    expiresIn: '1h'
-                }
+                { id: 1, correo: 'kevin@test.com', role: 'admin' },
+                'test_secret',
+                { expiresIn: '1h' }
             );
-
-        expect(res.status).toHaveBeenCalledWith(200);
-        expect(res.json).toHaveBeenCalledWith({
-            message: 'Login existoso',
-            token: 'fake_jwt_token',
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.json).toHaveBeenCalledWith({
+                message: 'Login exitoso',
+                token: 'fake_jwt_token',
                 user: {
                     id: 1,
                     nombre: 'Kevin',

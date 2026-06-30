@@ -7,6 +7,9 @@ const router = express.Router();
 // crear libro
 router.post("/", verifyToken, LibroController.createLibro);
 
+// importar lote desde CSV — tiene que ir antes de /:id pa que express no lo confunda
+router.post("/import", verifyToken, LibroController.importLibros);
+
 // listar todos con filtros opcionales por query params
 router.get("/", verifyToken, LibroController.getAllLibros);
 

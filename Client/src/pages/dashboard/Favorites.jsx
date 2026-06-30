@@ -1,31 +1,21 @@
-import React, { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/sidebar";
 import { useLogoutToast } from "../../hooks/useLogoutToast";
+import { useToast } from "../../hooks/useToast";
 
 import { getFavorites, deleteFavorite } from "../../services/favorito.service";
 import { createReserva } from "../../services/reserva.service";
 
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
+
 function Favorites() {
   const navigate = useNavigate();
-  const { toast, openToast } = useLogoutToast();
+  const { toast: logoutToast, openToast } = useLogoutToast();
+  const { toast: feedbackToast, showToast } = useToast();
 
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [toastReserva, setToastReserva] = useState({
-    show: false,
-    title: "",
-    msg: "",
-  });
-
-  //reserva
-  const showToast = (title, msg) => {
-    setToastReserva({ show: true, title, msg });
-    setTimeout(
-      () => setToastReserva({ show: false, title: "", msg: "" }),
-      3000,
-    );
-  };
 
   const handleReservar = async (idLibro) => {
     try {
@@ -112,7 +102,7 @@ function Favorites() {
 
   return (
     <div className="favoritos-page">
-      <div className="app layout">
+      <div className="app-layout">
         <Sidebar onLogout={openToast} />
 
         <main className="favoritos-content">
@@ -144,7 +134,7 @@ function Favorites() {
             )}
             <div className="favoritos-grid">
               {favorites.map((libro) => {
-                const coverUrl = `http://localhost:3000${libro.cover}`;
+                const coverUrl = `${SERVER_URL}${libro.cover}`;
 
                 return (
                   <article key={libro.id_libro} className="favorito-card">
@@ -211,31 +201,8 @@ function Favorites() {
               })}
             </div>
           </section>
-          <div
-            className={"reserve-toast" + (toastReserva.show ? "" : " hidden")}
-            role="status"
-            aria-live="polite"
-          >
-            <div className="toast-content">
-              <i
-                className={`fa-solid ${toastReserva.title === "Error" ? "fa-circle-xmark" : "fa-circle-check"}`}
-              />
-              <div>
-                <p className="toast-title">{toastReserva.title}</p>
-                <p className="toast-msg">{toastReserva.msg}</p>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() =>
-                setToastReserva({ show: false, title: "", msg: "" })
-              }
-            >
-              <i className="fa-solid fa-xmark" />
-            </button>
-          </div>
-          {toast}
+          {feedbackToast}
+          {logoutToast}
         </main>
       </div>
     </div>

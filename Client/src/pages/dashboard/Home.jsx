@@ -1,7 +1,11 @@
 import { useEffect, useState, useRef } from "react";
-import { useNavigate, Link} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/sidebar";
 import { useLogoutToast } from "../../hooks/useLogoutToast";
+import { getLibrosRequest, getGenres } from "../../services/libro.service";
+
+// URL base del server pa las portadas — va de .env pa no tenerla hardcodeada
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
 
 
 function Home() {
@@ -9,14 +13,14 @@ function Home() {
   
   // ==== Estado búsqueda ====
   const [query, setQuery] = useState("");
-  const [libros, setLibros] = useState([]); 
+  const [libros, setLibros] = useState([]);
   const [recentBooks, setRecentBooks] = useState([]);
   const [showResults, setShowResults] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState("");
   const [sortField, setSortField] = useState("title");
   const [sortOrder, setSortOrder] = useState("ASC");
   const [genres, setGenres] = useState([]);
-  
+
   // ==== Estado carrusel ====
   const [currentIndex, setCurrentIndex] = useState(0); 
   const trackRef = useRef(null);
@@ -27,29 +31,14 @@ function Home() {
   // ==== Función para obtener libros desde la API ====
   const fetchLibros = async (search = "") => {
     try {
-      const token = localStorage.getItem("token");
-
-      const params = new URLSearchParams({
+      const data = await getLibrosRequest({
         title: search,
         genre: selectedGenre,
         sort: sortField,
-        order: sortOrder
+        order: sortOrder,
       });
-
-      const response = await fetch(
-        `http://localhost:3000/api/libros?${params.toString()}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          }
-        }
-      );
-  
-      const data = await response.json();
-      setLibros(data.libros || [])
-      
-    } catch (error) {
-    }
+      setLibros(data.libros || []);
+    } catch (error) {}
   }
   
   // ==== Lógica de búsqueda ====
@@ -68,28 +57,15 @@ function Home() {
     return () => clearTimeout(delay);
   }, [query, selectedGenre, sortField, sortOrder]);
 
-
 // === Obtener libros recientes para el carrusel ====
   useEffect(() => {
     const fetchRecentBooks = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const response = await fetch(
-        "http://localhost:3000/api/libros",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          }
-        }
-      );
-
-      const data = await response.json();
-      const sorted = (data.libros || []).sort((a, b) => b.id_libro - a.id_libro).slice(0, 8);
-
-      setRecentBooks(sorted);
-      setCurrentIndex(0);
-      } catch (error) {
-      }
+        const data = await getLibrosRequest();
+        const sorted = (data.libros || []).sort((a, b) => b.id_libro - a.id_libro).slice(0, 8);
+        setRecentBooks(sorted);
+        setCurrentIndex(0);
+      } catch (error) {}
     }
     fetchRecentBooks();
   }, []);
@@ -128,24 +104,10 @@ function Home() {
   useEffect(() => {
     const fetchGenres = async () => {
       try {
-      const token = localStorage.getItem("token");
-
-      const response = await fetch(
-        "http://localhost:3000/api/libros/genres",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          }
-        }
-      );
-
-      const data = await response.json();
-      setGenres(data.genres || []);
-
-      } catch (error) {
-      }
+        const data = await getGenres();
+        setGenres(data.genres || []);
+      } catch (error) {}
     }
-
     fetchGenres();
   }, [])
 
@@ -174,7 +136,7 @@ function Home() {
     navigate(`/detalle/${book.id_libro}`);
   };
 
-  
+
   return (
     <div className="home-page">
       {/* ===== Sidebar ===== */}
@@ -225,7 +187,7 @@ function Home() {
                     onClick={() => handleCardClick(book)}
                   >
                     <figure className="cover">
-                      <img src={`http://localhost:3000${book.cover}`} alt={`Portada de ${book.title}`} />
+                      <img src={`${SERVER_URL}${book.cover}`} alt={`Portada de ${book.title}`} />
                     </figure>
                     <div className="book-title">{book.title}</div>
                     <div className="book-author">({book.author})</div>
@@ -333,7 +295,7 @@ function Home() {
                   margin: "18px 0",
                 }}
               >
-                No encontramos resultados para “{query.trim()}”.
+                No encontramos resultados para "{query.trim()}".
               </p>
             ) : (
               libros.map((book) => (
@@ -344,9 +306,9 @@ function Home() {
                 >
                   <figure>
                     <img
-                      src={`http://localhost:3000${book.cover}`} alt={`Portada de ${book.title}`}
+                      src={`${SERVER_URL}${book.cover}`} alt={`Portada de ${book.title}`}
                     />
-                  </figure>
+                  </figure> 
                   <div className="rc-meta">
                     <h5>{book.title}</h5>
                     <small>({book.author})</small>
@@ -355,6 +317,7 @@ function Home() {
               ))
             )}
           </div>
+
         </section>
 
         {/* ===== Toast: Cerrar sesión ===== */}
@@ -364,4 +327,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default Home;

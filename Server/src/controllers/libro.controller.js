@@ -114,6 +114,30 @@ class LibroController {
   }
 
 
+  // IMPORTAR LIBROS EN LOTE — recibe un array de libros parseado del CSV en el front
+  static async importLibros(req, res) {
+    try {
+      const { books } = req.body;
+
+      if (!Array.isArray(books) || books.length === 0) {
+        return res.status(400).json({ message: "No se enviaron libros para importar" });
+      }
+
+      // el modelo inserta uno a uno y acumula errores sin frenar todo el lote
+      const results = await Libro.bulkCreate(books);
+
+      return res.status(200).json({
+        message: `${results.created} libro(s) importado(s) correctamente`,
+        created: results.created,
+        errors: results.errors,
+      });
+
+    } catch (error) {
+      return res.status(500).json({ message: "Error al importar libros" });
+    }
+  }
+
+
   //borrar libro — soft delete, no lo borro fisicamente, solo lo pongo inactivo
   static async deleteLibro(req, res) {
     try {

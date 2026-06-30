@@ -1,18 +1,22 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useLogoutToast } from "../../hooks/useLogoutToast";
+import { useToast } from "../../hooks/useToast";
 import {
   isFavorite,
   addFavorite,
   deleteFavorite,
 } from "../../services/favorito.service";
 import { createReserva } from "../../services/reserva.service";
+import { getLibroById } from "../../services/libro.service";
 import Sidebar from "../../components/sidebar";
-import axios from "axios";
+
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
 
 function Detalle() {
   const navigate = useNavigate();
-  const { toast, openToast } = useLogoutToast();
+  const { toast: logoutToast, openToast } = useLogoutToast();
+  const { toast: shareToast, showToast } = useToast();
   const { id } = useParams();
 
   const [book, setBook] = useState(null);
@@ -29,13 +33,9 @@ function Detalle() {
   useEffect(() => {
     const fetchBook = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const res = await axios.get(`http://localhost:3000/api/libros/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setBook(res.data);
+        // getLibroById usa api.js — token va automático por el interceptor
+        const data = await getLibroById(id);
+        setBook(data);
 
         const favRes = await isFavorite(id);
         setIsFav(Boolean(favRes.isFav));
@@ -69,7 +69,7 @@ function Detalle() {
 
   const formattedStatus = statusMap[book.status] || "Desconocido";
   if (!book) return null;
-  const coverPath = `http://localhost:3000${book.cover}`;
+  const coverPath = `${SERVER_URL}${book.cover}`;
 
   const handleReserve = async () => {
     try {
@@ -120,6 +120,32 @@ function Detalle() {
     setShowReserveToast(false);
   };
 
+  const handleShare = async () => {
+    const url = window.location.href;
+
+    // Web Share API disponible en mobile y algunos browsers de escritorio
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: book.title,
+          text: `${book.title} — ${book.author}`,
+          url,
+        });
+      } catch (err) {
+        // el usuario canceló el diálogo, no hago nada
+      }
+      return;
+    }
+
+    // fallback: copiar al portapapeles
+    try {
+      await navigator.clipboard.writeText(url);
+      showToast("Enlace copiado", "El link del libro se copió al portapapeles");
+    } catch (err) {
+      showToast("Error", "No se pudo copiar el enlace");
+    }
+  };
+
   return (
     <div className="detalle-page">
       <Sidebar onLogout={openToast} />
@@ -157,7 +183,7 @@ function Detalle() {
                   {isFav ? "Quitar" : "Favorito"}
                 </button>
 
-                <button className="btn share" type="button">
+                <button className="btn share" type="button" onClick={handleShare}>
                   Compartir
                 </button>
               </div>
@@ -238,7 +264,8 @@ function Detalle() {
           </button>
         </div>
       </main>
-      {toast}
+      {logoutToast}
+      {shareToast}
     </div>
   );
 }

@@ -1,25 +1,22 @@
-import React, { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Sidebar from "../../components/sidebar";
 import { useLogoutToast } from "../../hooks/useLogoutToast";
+import { useToast } from "../../hooks/useToast";
 import {
   getPrestamosAdmin,
   devolverPrestamo,
 } from "../../services/prestamo.service";
 
 const ITEMS_POR_PAGINA = 10;
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
 
 function PrestamosAdmin() {
   const [prestamos, setPrestamos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [paginaActual, setPaginaActual] = useState(1);
-  const [toastMsg, setToastMsg] = useState({ show: false, title: "", msg: "" });
-  const { toast, openToast } = useLogoutToast();
-
-  const showToast = (title, msg) => {
-    setToastMsg({ show: true, title, msg });
-    setTimeout(() => setToastMsg({ show: false, title: "", msg: "" }), 3000);
-  };
+  const { toast: logoutToast, openToast } = useLogoutToast();
+  const { toast: feedbackToast, showToast } = useToast();
 
   const cargarPrestamos = async () => {
     try {
@@ -189,7 +186,7 @@ function PrestamosAdmin() {
                         <td>
                           {p.cover && (
                             <img
-                              src={`http://localhost:3000${p.cover}`}
+                              src={`${SERVER_URL}${p.cover}`}
                               alt={p.title}
                               width="40"
                               style={{ borderRadius: "4px" }}
@@ -287,29 +284,8 @@ function PrestamosAdmin() {
             )}
           </section>
 
-          <div
-            className={"reserve-toast" + (toastMsg.show ? "" : " hidden")}
-            role="status"
-            aria-live="polite"
-          >
-            <div className="toast-content">
-              <i
-                className={`fa-solid ${toastMsg.title === "Error" ? "fa-circle-xmark" : "fa-circle-check"}`}
-              />
-              <div>
-                <p className="toast-title">{toastMsg.title}</p>
-                <p className="toast-msg">{toastMsg.msg}</p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setToastMsg({ show: false, title: "", msg: "" })}
-            >
-              <i className="fa-solid fa-xmark" />
-            </button>
-          </div>
-
-          {toast}
+          {feedbackToast}
+          {logoutToast}
         </main>
       </div>
     </div>

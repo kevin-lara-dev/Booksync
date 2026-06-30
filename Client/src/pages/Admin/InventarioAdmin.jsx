@@ -1,8 +1,10 @@
-import React, { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
+
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
 import Sidebar from "../../components/sidebar"
 import {useLogoutToast} from "../../hooks/useLogoutToast"
 import { useToast } from "../../hooks/useToast";
-import { getLibrosRequest, createLibro, updateLibro, deleteLibro } from "../../services/libro.service";
+import { getLibrosRequest, createLibro, updateLibro, deleteLibro, importLibros } from "../../services/libro.service";
 import BookFormModal from "./BookFormModal";
 import Swal from "sweetalert2";
 
@@ -40,8 +42,15 @@ function InventarioAdmin (){
         cover: ""
     })
 
+    // paginación
+    const ITEMS_PER_PAGE = 10;
+    const [currentPage, setCurrentPage] = useState(1);
+
     const {toast: logoutToast, openToast} = useLogoutToast();
     const { toast: feedbackToast, showToast } = useToast();
+
+    // ref para el input file oculto del importar CSV
+    const importInputRef = useRef(null);
 
 
 
@@ -171,13 +180,99 @@ function InventarioAdmin (){
     }
 
 
-    const handleImport = () => {
-        showToast("Próximamente", "Importar inventario estará disponible pronto")
+    // EXPORTAR CSV — genera el archivo en el navegador sin ir al servidor
+    const handleExport = () => {
+        if (books.length === 0) {
+            showToast("Aviso", "No hay libros en el inventario para exportar");
+            return;
+        }
+
+        const headers = ["isbn", "title", "author", "genre", "publication_year",
+                         "available_quantity", "location", "status", "editorial", "description"];
+
+        // envuelvo cada valor en comillas dobles y escapo las comillas internas
+        const escape = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+
+        const csvRows = [
+            headers.join(","),
+            ...books.map((b) => headers.map((h) => escape(b[h])).join(",")),
+        ];
+
+        const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `inventario_booksync_${new Date().toISOString().slice(0, 10)}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
     };
 
 
-    const handleExport = () => {
-        showToast("Próximamente", "Exportar inventario estará disponible pronto");
+    // IMPORTAR CSV — abre el selector de archivos
+    const handleImport = () => {
+        importInputRef.current?.click();
+    };
+
+    // se dispara cuando el usuario elige un archivo CSV
+    const handleFileChange = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        try {
+            const text = await file.text();
+            const lines = text.trim().split(/\r?\n/);
+
+            if (lines.length < 2) {
+                showToast("Error", "El CSV no tiene datos");
+                return;
+            }
+
+            // primera fila = encabezados, limpios de comillas y espacios
+            const headers = lines[0].split(",").map((h) => h.replace(/"/g, "").trim());
+
+            // parseo simple: separo por coma respetando campos entre comillas
+            const parseRow = (line) => {
+                const values = [];
+                let current = "";
+                let inQuotes = false;
+                for (const ch of line) {
+                    if (ch === '"') { inQuotes = !inQuotes; }
+                    else if (ch === "," && !inQuotes) { values.push(current.trim()); current = ""; }
+                    else { current += ch; }
+                }
+                values.push(current.trim());
+                return values;
+            };
+
+            const parsedBooks = lines.slice(1)
+                .map((line) => {
+                    const values = parseRow(line);
+                    const row = {};
+                    headers.forEach((h, i) => { row[h] = values[i] ?? ""; });
+                    return row;
+                })
+                .filter((row) => row.isbn?.trim() && row.title?.trim()); // descarto filas vacías
+
+            if (parsedBooks.length === 0) {
+                showToast("Error", "No se encontraron filas válidas en el CSV (isbn y title son obligatorios)");
+                return;
+            }
+
+            const result = await importLibros(parsedBooks);
+
+            if (result.errors?.length > 0) {
+                showToast("Importado parcialmente", `${result.created} creados, ${result.errors.length} con error`);
+            } else {
+                showToast("Listo", result.message);
+            }
+
+            fetchLibros();
+        } catch (error) {
+            showToast("Error", "No se pudo procesar el archivo CSV");
+        } finally {
+            // limpio el input pa que se pueda volver a importar el mismo archivo
+            e.target.value = "";
+        }
     };
 
 
@@ -187,6 +282,17 @@ function InventarioAdmin (){
 
 
 
+
+    // cuando el usuario busca, vuelvo a la primera página pa no quedarme en una vacía
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [search]);
+
+    const totalPages = Math.ceil(filteredBooks.length / ITEMS_PER_PAGE);
+    const paginatedBooks = filteredBooks.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE,
+    );
 
     const visibleIds = filteredBooks.map((b) => b.id_libro);
     const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.includes(id));
@@ -242,10 +348,18 @@ function InventarioAdmin (){
                                     <span>Agregar libro</span>
                                 </button>
 
-                                <button type="button" className="inv-btn inv-btn--primary" onClick={handleImport}>
+                                        <button type="button" className="inv-btn inv-btn--primary" onClick={handleImport}>
                                     <i className="fa-solid fa-file-import" aria-hidden="true" />
                                     <span>Importar</span>
                                 </button>
+                                {/* input oculto — solo acepta CSV */}
+                                <input
+                                    ref={importInputRef}
+                                    type="file"
+                                    accept=".csv,text/csv"
+                                    style={{ display: "none" }}
+                                    onChange={handleFileChange}
+                                />
 
                                 <button type="button" className="inv-btn inv-btn--primary" onClick={handleExport}>
                                     <i className="fa-solid fa-file-export" aria-hidden="true" />
@@ -323,7 +437,7 @@ function InventarioAdmin (){
                                     </thead>
 
                                     <tbody>
-                                        {filteredBooks.map((book) => (
+                                        {paginatedBooks.map((book) => (
                                             <tr key={book.id_libro}>
                                                 <td className="col-checkbox">
                                                     <input type="checkbox" aria-label={`Seleccionar ${book.title}`} checked={selectedIds.includes(book.id_libro)} onChange={() => handleToggleRow(book.id_libro)}/>
@@ -332,7 +446,7 @@ function InventarioAdmin (){
                                                 <td>
                                                     {book.cover && (
                                                         <img
-                                                        src={`http://localhost:3000${book.cover}`}
+                                                        src={`${SERVER_URL}${book.cover}`}
                                                         alt={book.title}
                                                         width="40"
                                                         style={{ borderRadius: "4px" }}
@@ -394,6 +508,43 @@ function InventarioAdmin (){
                         onSubmit={handleSubmitBook}
                         isEditing={!!editingBook}
                         />
+
+                        {/* ===== PAGINACIÓN ===== */}
+                        {totalPages > 1 && (
+                            <div className="pagination" role="navigation" aria-label="Paginacion">
+                                <button
+                                    className="pagination-btn"
+                                    type="button"
+                                    onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                                    disabled={currentPage === 1}
+                                    aria-label="Pagina anterior"
+                                >
+                                    <i className="fa-solid fa-chevron-left" />
+                                </button>
+
+                                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                                    <button
+                                        key={page}
+                                        className={`pagination-btn ${page === currentPage ? "pagination-btn--active" : ""}`}
+                                        type="button"
+                                        onClick={() => setCurrentPage(page)}
+                                        aria-current={page === currentPage ? "page" : undefined}
+                                    >
+                                        {page}
+                                    </button>
+                                ))}
+
+                                <button
+                                    className="pagination-btn"
+                                    type="button"
+                                    onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                                    disabled={currentPage === totalPages}
+                                    aria-label="Pagina siguiente"
+                                >
+                                    <i className="fa-solid fa-chevron-right" />
+                                </button>
+                            </div>
+                        )}
 
                         {/* ===== FOOTER ===== */}
                         <footer className="inventory-admin-footer">

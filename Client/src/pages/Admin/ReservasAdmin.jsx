@@ -1,6 +1,7 @@
-import React, { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import Sidebar from "../../components/sidebar";
 import { useLogoutToast } from "../../hooks/useLogoutToast";
+import { useToast } from "../../hooks/useToast";
 import {
   getReservasAdmin,
   confirmReservaAdmin,
@@ -9,6 +10,7 @@ import {
 import { crearPrestamo } from "../../services/prestamo.service";
 
 const ITEMS_POR_PAGINA = 10;
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
 
 function ReservasAdmin() {
   const [reservas, setReservas] = useState([]);
@@ -21,20 +23,8 @@ function ReservasAdmin() {
   const [filtroFecha, setFiltroFecha] = useState("");
   const [filtroUsuario, setFiltroUsuario] = useState("");
   const [filtroGenero, setFiltroGenero] = useState("");
-  const [toastReserva, setToastReserva] = useState({
-    show: false,
-    title: "",
-    msg: "",
-  });
-  const { toast, openToast } = useLogoutToast();
-
-  const showToast = (title, msg) => {
-    setToastReserva({ show: true, title, msg });
-    setTimeout(
-      () => setToastReserva({ show: false, title: "", msg: "" }),
-      3000,
-    );
-  };
+  const { toast: logoutToast, openToast } = useLogoutToast();
+  const { toast: feedbackToast, showToast } = useToast();
 
   const cargarReservas = async () => {
     try {
@@ -305,8 +295,43 @@ function ReservasAdmin() {
     showToast("Aviso", "Esta acción se puede implementar después.");
   const handleHistorial = () =>
     showToast("Aviso", "Esta acción se puede implementar después.");
-  const handleExportar = () =>
-    showToast("Aviso", "Esta acción se puede implementar después.");
+
+  // EXPORTAR reservas filtradas a CSV
+  const handleExportar = () => {
+    if (reservasFiltradas.length === 0) {
+      showToast("Aviso", "No hay reservas para exportar");
+      return;
+    }
+
+    const headers = ["id_reserva", "isbn", "title", "author", "genre",
+                     "usuario", "correo", "fecha_reserva", "expires_at", "estado"];
+
+    const escape = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+
+    const csvRows = [
+      headers.join(","),
+      ...reservasFiltradas.map((r) => [
+        r.id_reserva,
+        r.isbn,
+        r.title,
+        r.author,
+        r.genre,
+        getUsuario(r),
+        r.correo,
+        r.fecha_reserva ? new Date(r.fecha_reserva).toLocaleDateString("es-CO") : "",
+        r.expires_at   ? new Date(r.expires_at).toLocaleDateString("es-CO")   : "",
+        r.estado,
+      ].map(escape).join(",")),
+    ];
+
+    const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url  = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href     = url;
+    link.download = `reservas_booksync_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   const renderEstadoPill = (reserva) => (
     <span
@@ -504,7 +529,7 @@ function ReservasAdmin() {
                         <td>
                           {res.cover && (
                             <img
-                              src={`http://localhost:3000${res.cover}`}
+                              src={`${SERVER_URL}${res.cover}`}
                               alt={res.title}
                               width="40"
                               style={{ borderRadius: "4px" }}
@@ -649,31 +674,8 @@ function ReservasAdmin() {
             </footer>
           </section>
 
-          <div
-            className={"reserve-toast" + (toastReserva.show ? "" : " hidden")}
-            role="status"
-            aria-live="polite"
-          >
-            <div className="toast-content">
-              <i
-                className={`fa-solid ${toastReserva.title === "Error" ? "fa-circle-xmark" : "fa-circle-check"}`}
-              />
-              <div>
-                <p className="toast-title">{toastReserva.title}</p>
-                <p className="toast-msg">{toastReserva.msg}</p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() =>
-                setToastReserva({ show: false, title: "", msg: "" })
-              }
-            >
-              <i className="fa-solid fa-xmark" />
-            </button>
-          </div>
-
-          {toast}
+          {feedbackToast}
+          {logoutToast}
         </main>
       </div>
     </div>

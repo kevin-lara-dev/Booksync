@@ -1,5 +1,3 @@
-// TODO: en el futuro implementar refresh token y blacklist para el logout real
-
 const User = require("../models/user.model");
 const ResetToken = require("../models/reset_token.model");
 const { resetPasswordTemplate } = require("../utils/emailTemplates");
@@ -27,59 +25,31 @@ class AuthController {
   static async register(req, res) {
     try {
       // saco todo lo que necesito del body
-      const {
-        nombre,
-        apellido,
-        tipo_documento,
-        numero_documento,
-        fecha_nacimiento,
-        correo,
-        password,
-      } = req.body;
+      const { nombre, apellido, tipo_documento, numero_documento, fecha_nacimiento, correo, password } = req.body;
 
       // si falta algo rechazo antes de ir a la bd
-      if (
-        !nombre ||
-        !apellido ||
-        !tipo_documento ||
-        !numero_documento ||
-        !fecha_nacimiento ||
-        !correo ||
-        !password
-      ) {
-        return res
-          .status(400)
-          .json({ message: "Todos los campos son obligatorios" });
+      if (!nombre || !apellido || !tipo_documento || !numero_documento || !fecha_nacimiento || !correo || !password) {
+        return res.status(400).json({ message: "Todos los campos son obligatorios" });
       }
 
       // no dejo registrar el mismo correo dos veces
       const existingUser = await User.findByEmail(correo);
       if (existingUser) {
-        return res
-          .status(409)
-          .json({ message: "El correo ya esta registrado" });
+        return res.status(409).json({ message: "El correo ya esta registrado" });
       }
 
       // nunca guardo la contrasena en texto plano, siempre hasheada con salt 10
       const password_hash = await bcrypt.hash(password, 10);
 
-      const userId = await User.create({
-        nombre,
-        apellido,
-        tipo_documento,
-        numero_documento,
-        fecha_nacimiento,
-        correo,
-        password_hash,
-      });
+      const userId = await User.create({ nombre, apellido, tipo_documento, numero_documento, fecha_nacimiento, correo, password_hash });
 
-      return res
-        .status(201)
-        .json({ message: "Usuario creado exitosamente", userId });
+      return res.status(201).json({ message: "Usuario creado exitosamente", userId });
+
     } catch (error) {
       res.status(500).json({ message: "Error al crear un usuario" });
     }
   }
+
 
   // LOGIN
   static async login(req, res) {
@@ -87,9 +57,7 @@ class AuthController {
       const { correo, password } = req.body;
 
       if (!correo || !password) {
-        return res
-          .status(400)
-          .json({ message: "Todos los campos son obligatorios" });
+        return res.status(400).json({ message: "Todos los campos son obligatorios" });
       }
 
       // busco el usuario, si no existe respondo lo mismo que si la contrasena es incorrecta
@@ -114,25 +82,20 @@ class AuthController {
       const token = jwt.sign(
         { id: user.id_usuario, correo: user.correo, role: user.tipo },
         JWT_SECRET,
-        { expiresIn: JWT_EXPIRES_IN },
+        { expiresIn: JWT_EXPIRES_IN }
       );
 
       return res.status(200).json({
         message: "Login exitoso",
         token,
-        user: {
-          id: user.id_usuario,
-          nombre: user.nombre,
-          correo: user.correo,
-          role: user.tipo,
-        },
+        user: { id: user.id_usuario, nombre: user.nombre, correo: user.correo, role: user.tipo },
       });
+
     } catch (error) {
-      return res
-        .status(500)
-        .json({ message: "Error, no se pudo iniciar sesion" });
+      return res.status(500).json({ message: "Error, no se pudo iniciar sesion" });
     }
   }
+
 
   // FORGOT PASSWORD
   static async forgotPassword(req, res) {
@@ -171,12 +134,12 @@ class AuthController {
       return res.status(200).json({
         message: "Si ese correo esta registrado, recibiras un enlace",
       });
+
     } catch (error) {
-      return res
-        .status(500)
-        .json({ message: "Error al procesar la solicitud" });
+      return res.status(500).json({ message: "Error al procesar la solicitud" });
     }
   }
+
 
   // RESET PASSWORD
   static async resetPassword(req, res) {
@@ -185,18 +148,14 @@ class AuthController {
       const { password } = req.body;
 
       if (!password) {
-        return res
-          .status(400)
-          .json({ message: "La contrasena es obligatoria" });
+        return res.status(400).json({ message: "La contrasena es obligatoria" });
       }
 
       // findByToken ya verifica la expiracion, si devuelve null rechazo sin preguntar mas
       const resetRecord = await ResetToken.findByToken(token);
 
       if (!resetRecord) {
-        return res
-          .status(400)
-          .json({ message: "El enlace no es valido o ya expiro" });
+        return res.status(400).json({ message: "El enlace no es valido o ya expiro" });
       }
 
       const password_hash = await bcrypt.hash(password, 10);
@@ -207,13 +166,10 @@ class AuthController {
       // borro el token pa que el link no pueda reutilizarse
       await ResetToken.deleteByToken(token);
 
-      return res
-        .status(200)
-        .json({ message: "Contrasena actualizada correctamente" });
+      return res.status(200).json({ message: "Contrasena actualizada correctamente" });
+
     } catch (error) {
-      return res
-        .status(500)
-        .json({ message: "Error al restablecer la contrasena" });
+      return res.status(500).json({ message: "Error al restablecer la contrasena" });
     }
   }
 }

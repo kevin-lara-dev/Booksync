@@ -1,19 +1,17 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "../../components/sidebar";
 import { useLogoutToast } from "../../hooks/useLogoutToast";
+import { useToast } from "../../hooks/useToast";
 import { getMisPrestamos } from "../../services/prestamo.service";
 
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
+
 function PrestamosUsuarios() {
-  const { toast, openToast } = useLogoutToast();
+  const { toast: logoutToast, openToast } = useLogoutToast();
+  const { toast: feedbackToast, showToast } = useToast();
 
   const [prestamos, setPrestamos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [toastMsg, setToastMsg] = useState({ show: false, title: "", msg: "" });
-
-  const showToast = (title, msg) => {
-    setToastMsg({ show: true, title, msg });
-    setTimeout(() => setToastMsg({ show: false, title: "", msg: "" }), 3000);
-  };
 
   useEffect(() => {
     const fetchPrestamos = async () => {
@@ -156,7 +154,7 @@ function PrestamosUsuarios() {
             <div className="prestamos-grid">
               {prestamos.map((prestamo) => {
                 const display = getDisplayEstado(prestamo);
-                const portada = `http://localhost:3000${prestamo.cover}`;
+                const portada = `${SERVER_URL}${prestamo.cover}`;
 
                 return (
                   <article key={prestamo.id_prestamo} className="prestamo-card">
@@ -183,32 +181,10 @@ function PrestamosUsuarios() {
             </div>
           </section>
 
-          <div
-            className={"reserve-toast" + (toastMsg.show ? "" : " hidden")}
-            role="status"
-            aria-live="polite"
-          >
-            <div className="toast-content">
-              <i
-                className={`fa-solid ${
-                  toastMsg.title === "Error" ? "fa-circle-xmark" : "fa-circle-check"
-                }`}
-              />
-              <div>
-                <p className="toast-title">{toastMsg.title}</p>
-                <p className="toast-msg">{toastMsg.msg}</p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setToastMsg({ show: false, title: "", msg: "" })}
-            >
-              <i className="fa-solid fa-xmark" />
-            </button>
-          </div>
+          {feedbackToast}
         </main>
 
-        {toast}
+        {logoutToast}
       </div>
     </div>
   );

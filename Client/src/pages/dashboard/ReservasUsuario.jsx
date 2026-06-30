@@ -1,26 +1,17 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "../../components/sidebar";
 import { useLogoutToast } from "../../hooks/useLogoutToast";
+import { useToast } from "../../hooks/useToast";
 import { getReservas, deleteReserva } from "../../services/reserva.service";
 
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
+
 function ReservasUsuario() {
-  const { toast, openToast } = useLogoutToast();
+  const { toast: logoutToast, openToast } = useLogoutToast();
+  const { toast: feedbackToast, showToast } = useToast();
 
   const [reservas, setReservas] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [toastReserva, setToastReserva] = useState({
-    show: false,
-    title: "",
-    msg: "",
-  });
-
-  const showToast = (title, msg) => {
-    setToastReserva({ show: true, title, msg });
-
-    setTimeout(() => {
-      setToastReserva({ show: false, title: "", msg: "" });
-    }, 3000);
-  };
 
   // Mostrar canceladas/expiradas solo por 7 días más
   const esVisibleReciente = (reserva) => {
@@ -224,7 +215,7 @@ function ReservasUsuario() {
 
             <div className="reservas-grid">
               {reservas.map((reserva) => {
-                const portada = `http://localhost:3000${reserva.cover}`;
+                const portada = `${SERVER_URL}${reserva.cover}`;
 
                 return (
                   <article key={reserva.id_reserva} className="reserva-card">
@@ -268,37 +259,10 @@ function ReservasUsuario() {
             </div>
           </section>
 
-          <div
-            className={"reserve-toast" + (toastReserva.show ? "" : " hidden")}
-            role="status"
-            aria-live="polite"
-          >
-            <div className="toast-content">
-              <i
-                className={`fa-solid ${
-                  toastReserva.title === "Error"
-                    ? "fa-circle-xmark"
-                    : "fa-circle-check"
-                }`}
-              />
-              <div>
-                <p className="toast-title">{toastReserva.title}</p>
-                <p className="toast-msg">{toastReserva.msg}</p>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() =>
-                setToastReserva({ show: false, title: "", msg: "" })
-              }
-            >
-              <i className="fa-solid fa-xmark" />
-            </button>
-          </div>
+          {feedbackToast}
         </main>
 
-        {toast}
+        {logoutToast}
       </div>
     </div>
   );
