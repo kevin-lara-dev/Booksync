@@ -2,7 +2,7 @@ import axios from "axios";
 
 // instancia de axios con el baseURL ya configurado, la uso en todos los servicios
 const api = axios.create({
-  baseURL: "http://localhost:3000/api",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000/api",
 });
 
 // antes de cada petición le meto el token si existe, pa no hacerlo manual en cada llamada
