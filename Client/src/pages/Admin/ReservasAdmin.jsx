@@ -139,7 +139,7 @@ function ReservasAdmin() {
     });
   }, [reservas, search, filtroEstado, filtroFecha, filtroUsuario, filtroGenero]);
 
-  // Paginado
+  // Divide los resultados filtrados en páginas de 10 elementos cada una
   const totalPaginas = Math.ceil(reservasFiltradas.length / ITEMS_POR_PAGINA);
 
   const reservasPaginadas = useMemo(() => {
@@ -296,7 +296,7 @@ function ReservasAdmin() {
   const handleHistorial = () =>
     showToast("Aviso", "Esta acción se puede implementar después.");
 
-  // EXPORTAR reservas filtradas a CSV
+  // Genera y descarga un archivo CSV con las reservas que están visibles según los filtros activos
   const handleExportar = () => {
     if (reservasFiltradas.length === 0) {
       showToast("Aviso", "No hay reservas para exportar");
@@ -610,7 +610,7 @@ function ReservasAdmin() {
               </table>
             </div>
 
-            {/* PAGINADO */}
+            {/* Controles de paginación */}
             {totalPaginas > 1 && (
               <div className="reservas-admin-pagination">
                 <button

@@ -4,10 +4,10 @@ const User = require("../models/user.model");
 
 class UserController {
 
-  //OBTENEMOS PERFIL
+  // Obtiene el perfil del usuario autenticado
   static async getProfile(req, res) {
     try {
-      // req.user.id me lo deja el middleware verifyToken después de leer el token
+      // req.user.id lo agrega el middleware verifyToken después de validar el JWT
       const userId = req.user.id;
 
       const user = await User.findById(userId);
@@ -16,7 +16,7 @@ class UserController {
         return res.status(404).json({ message: "Usuario no encontrado" });
       }
 
-      // borro el hash antes de mandar el objeto, no quiero exponer eso al cliente
+      // Se elimina el hash de la respuesta antes de enviarla; nunca debe exponerse al cliente
       delete user.password_hash;
 
       res.json(user);
@@ -26,7 +26,8 @@ class UserController {
   }
 
 
-  // userAll — solo para admin, isAdmin lo valida en la ruta
+  // Lista todos los usuarios del sistema. Solo accesible para administradores;
+  // el middleware isAdmin se encarga de validarlo en la ruta.
   static async getAllUsers(req, res) {
     try {
       const usuarios = await User.getAllUsers();
@@ -37,12 +38,12 @@ class UserController {
   }
 
 
-  //Actualizamos perfil
+  // Actualiza los datos del perfil del usuario autenticado
   static async updateProfile(req, res) {
     try {
       const userId = req.user.id;
 
-      // armo el objeto solo con los campos que llegaron, no piso lo que no se envió
+      // Se construye el objeto solo con los campos que llegaron, para no sobrescribir los que no se enviaron
       const dataToUpdate = {};
       const { nombre, apellido, correo, fecha_nacimiento, tipo_documento, numero_documento } = req.body;
 
@@ -53,7 +54,7 @@ class UserController {
       if (tipo_documento) dataToUpdate.tipo_documento = tipo_documento;
       if (numero_documento) dataToUpdate.numero_documento = numero_documento;
 
-      // si el body llegó vacío no tiene sentido ir a la bd
+      // Si el cuerpo llegó vacío, no tiene sentido ejecutar la consulta
       if (Object.keys(dataToUpdate).length === 0) {
         return res.status(400).json({ message: "No se enviaron datos para actualizar" });
       }
@@ -71,7 +72,7 @@ class UserController {
   }
 
 
-  //ACTUALIZAMOS ESTADO
+  // Activa o desactiva un usuario. Solo puede ejecutarlo un administrador.
   static async changeStatus(req, res) {
     try {
       const { id } = req.params;
@@ -94,7 +95,7 @@ class UserController {
   }
 
 
-  //ACTUALIZAMOS TIPO DE USUARIO
+  // Cambia el rol de un usuario. Solo puede ejecutarlo un administrador.
   static async changeRole(req, res) {
     try {
       const { id } = req.params;
@@ -104,12 +105,14 @@ class UserController {
         return res.status(400).json({ message: "El tipo es obligatorio" });
       }
 
-      // no dejo que el admin se cambie el rol a sí mismo, pa que no quede bloqueado
+      // No se permite que un administrador cambie su propio rol,
+      // para evitar que el sistema quede sin ningún administrador
       if (req.user.id == id) {
         return res.status(400).json({ message: "No puedes cambiar tu propio rol" });
       }
 
-      // si van a quitarle el rol de admin a alguien, verifico que no sea el único que queda
+      // Si se va a retirar el rol de administrador a alguien,
+      // se verifica que haya al menos otro administrador activo en el sistema
       if (tipo !== "administrador") {
         const targetUser = await User.findById(id);
         if (targetUser?.tipo === "administrador") {
@@ -133,7 +136,7 @@ class UserController {
   }
 
 
-  //CAMBIAR CONTRASEÑA
+  // Permite al usuario cambiar su propia contraseña
   static async changePassword(req, res) {
     try {
       const userId = req.user.id;
@@ -153,7 +156,7 @@ class UserController {
         return res.status(404).json({ message: "Usuario no encontrado" });
       }
 
-      // confirmo que sí sepa su contraseña actual antes de dejarla cambiar
+      // Se verifica que el usuario conozca su contraseña actual antes de permitir el cambio
       const isMatch = await bcrypt.compare(passwordActual, user.password_hash);
       if (!isMatch) {
         return res.status(401).json({ message: "La contraseña actual es incorrecta" });
@@ -174,7 +177,7 @@ class UserController {
   }
 
 
-  //BORRAMOS UNA CUENTA — en realidad es soft delete, solo lo pone inactivo en la bd
+  // Soft delete: no se elimina el registro físicamente, solo se marca el usuario como inactivo
   static async deleteProfile(req, res) {
     try {
       const userId = req.user.id;

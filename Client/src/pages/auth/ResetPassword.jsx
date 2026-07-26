@@ -5,7 +5,7 @@ import { useToast } from "../../hooks/useToast";
 
 function Reset() {
   const navigate = useNavigate();
-  const { token } = useParams(); // leo el token directamente de la URL
+  const { token } = useParams(); // Lee el token directamente desde la URL (/reset-password/:token)
   const { toast, showToast } = useToast();
 
   const [form, setForm] = useState({
@@ -27,7 +27,7 @@ function Reset() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // validaciones locales antes de llamar al back
+    // Validaciones locales antes de hacer la petición al servidor
     if (form.password.length < 6) {
       setError("La contraseña debe tener al menos 6 caracteres");
       return;
@@ -40,12 +40,12 @@ function Reset() {
     setLoading(true);
 
     try {
-      // mando el token (de la URL) y la nueva contraseña al back
+      // Envía el token (tomado de la URL) y la nueva contraseña al servidor para completar el reset
       await resetPasswordRequest(token, form.password);
 
       showToast("Listo", "Contraseña actualizada correctamente");
 
-      // espero un momento pa que el usuario vea el toast y luego mando al login
+      // Espera un momento para que el usuario vea el toast de confirmación antes de redirigir al login
       setTimeout(() => navigate("/"), 2000);
 
     } catch (error) {

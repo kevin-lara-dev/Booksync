@@ -13,7 +13,7 @@ function ReservasUsuario() {
   const [reservas, setReservas] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Mostrar canceladas/expiradas solo por 7 días más
+  // Las reservas canceladas o expiradas se siguen mostrando 7 días después para que el usuario las vea en su historial reciente
   const esVisibleReciente = (reserva) => {
     if (!["cancelada", "expirada"].includes(reserva.estado)) {
       return true;
@@ -38,11 +38,11 @@ function ReservasUsuario() {
     return diffDias <= 7;
   };
 
-  //Cargar reserva
+  // Carga las reservas del usuario al montar el componente y filtra las que ya no son relevantes mostrar
   useEffect(() => {
     const fetchReservas = async () => {
       try {
-        const data = await getReservas(); // ← faltaba esta línea
+        const data = await getReservas();
         const reservasFiltradas = (data.reservas || []).filter(
           esVisibleReciente,
         );
@@ -57,7 +57,7 @@ function ReservasUsuario() {
     fetchReservas();
   }, []);
 
-  //Borrar reserva
+  // Cancela una reserva activa. Actualiza el estado local de forma optimista sin esperar a recargar la lista.
   const handleCancelar = async (idReserva) => {
     try {
       const res = await deleteReserva(idReserva);
@@ -83,7 +83,7 @@ function ReservasUsuario() {
     }
   };
 
-  //fecha
+  // Formatea una fecha en formato legible para el usuario (DD/MM/AAAA según locale colombiano)
   const formatDate = (dateString) => {
     if (!dateString) return "No disponible";
 
@@ -95,7 +95,7 @@ function ReservasUsuario() {
     });
   };
 
-  //mapear estado a texto legible
+  // Traduce el estado interno de la reserva al texto que ve el usuario en la insignia
   const getBadgeText = (estado) => {
     const map = {
       activa: "Activa",
@@ -108,7 +108,7 @@ function ReservasUsuario() {
     return map[estado] || estado;
   };
 
-  //renderizar estado de reserva en base al caso
+  // Renderiza la información de estado de cada reserva según su caso: activa, confirmada, cancelada, expirada o prestada
   const renderEstado = (reserva) => {
     switch (reserva.estado) {
       case "activa":
@@ -179,7 +179,7 @@ function ReservasUsuario() {
     }
   };
 
-  //Renderizar pagina
+  // Renderizado de la página
   return (
     <div className="reservas-page">
       <div className="app-layout">

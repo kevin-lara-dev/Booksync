@@ -137,7 +137,7 @@ function Account() {
           <div className="account-page__inner">
             <div className="account-page__panel">
 
-              {/* HEADER */}
+              {/* Encabezado: muestra el avatar y los datos básicos del usuario */}
               <header className="account-header">
                 <h1 className="account-header__title">CUENTA</h1>
                 <div className="account-header__row">
@@ -168,7 +168,7 @@ function Account() {
                 </div>
               </header>
 
-              {/* CUERPO */}
+              {/* Cuerpo del formulario: datos personales a la izquierda, seguridad a la derecha */}
               <main className="account-body">
 
                 {/* IZQUIERDA — datos personales */}
@@ -248,7 +248,7 @@ function Account() {
                 </section>
               </main>
 
-              {/* ZONA DE PELIGRO */}
+              {/* Zona de peligro: la desactivación de la cuenta es una acción permanente */}
               <footer className="account-danger-zone">
                 <button type="button" className="account-btn account-btn--danger" onClick={handleDeactivate}>
                   Solicitar desactivación

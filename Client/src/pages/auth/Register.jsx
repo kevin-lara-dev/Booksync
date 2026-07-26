@@ -48,7 +48,7 @@ function Register() {
       passwordConfirmed,
     } = form;
 
-    // Validaciones básicas
+    // Validaciones básicas del formulario antes de hacer la petición al servidor
     if (
       !nombre ||
       !apellido ||

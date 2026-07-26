@@ -6,12 +6,15 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 
-// saco el secret y la expiracion del .env pa no tenerlos hardcodeados
+// Configuración del token: el secreto y la duración se leen del .env para no tenerlos escritos fijos en el código
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN;
 
-// creo el transporter una sola vez al cargar el modulo, no dentro del metodo
-// si lo creara dentro de forgotPassword se instanciaria en cada request
+// URL del frontend: en producción se define en el .env; en desarrollo apunta al localhost
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+
+// El transporter se crea una sola vez al cargar el módulo.
+// Si se creara dentro de forgotPassword, se instanciaría en cada petición, lo cual es innecesario.
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -24,21 +27,21 @@ class AuthController {
   // REGISTRO
   static async register(req, res) {
     try {
-      // saco todo lo que necesito del body
+      // Extrae los campos obligatorios del cuerpo de la petición
       const { nombre, apellido, tipo_documento, numero_documento, fecha_nacimiento, correo, password } = req.body;
 
-      // si falta algo rechazo antes de ir a la bd
+      // Si falta algún campo, se rechaza la petición antes de llegar a la base de datos
       if (!nombre || !apellido || !tipo_documento || !numero_documento || !fecha_nacimiento || !correo || !password) {
         return res.status(400).json({ message: "Todos los campos son obligatorios" });
       }
 
-      // no dejo registrar el mismo correo dos veces
+      // Verifica que el correo no esté ya registrado antes de continuar
       const existingUser = await User.findByEmail(correo);
       if (existingUser) {
         return res.status(409).json({ message: "El correo ya esta registrado" });
       }
 
-      // nunca guardo la contrasena en texto plano, siempre hasheada con salt 10
+      // La contraseña nunca se guarda en texto plano; siempre se hashea con bcrypt usando salt 10
       const password_hash = await bcrypt.hash(password, 10);
 
       const userId = await User.create({ nombre, apellido, tipo_documento, numero_documento, fecha_nacimiento, correo, password_hash });
@@ -60,25 +63,26 @@ class AuthController {
         return res.status(400).json({ message: "Todos los campos son obligatorios" });
       }
 
-      // busco el usuario, si no existe respondo lo mismo que si la contrasena es incorrecta
-      // asi no le doy pistas a nadie de si un correo existe o no
+      // Si el usuario no existe, se responde igual que cuando la contraseña es incorrecta,
+      // de esta forma no se revela si un correo está registrado o no
       const user = await User.findByEmail(correo);
       if (!user) {
         return res.status(401).json({ message: "Credenciales invalidas" });
       }
 
-      // aunque las credenciales sean correctas, un usuario inactivo no puede entrar
+      // Aunque las credenciales sean válidas, un usuario inactivo no puede iniciar sesión
       if (user.estado !== "activo") {
         return res.status(403).json({ message: "Usuario inactivo" });
       }
 
-      // comparo lo que llego con el hash que tengo guardado en la bd
+      // Compara la contraseña enviada con el hash almacenado en la base de datos
       const isMatch = await bcrypt.compare(password, user.password_hash);
       if (!isMatch) {
         return res.status(401).json({ message: "Credenciales invalidas" });
       }
 
-      // firmo el token con id, correo y rol, el front lo guarda en localStorage
+      // Firma el token con el id, correo y rol del usuario.
+      // El frontend lo guarda en localStorage para enviarlo en cada petición posterior.
       const token = jwt.sign(
         { id: user.id_usuario, correo: user.correo, role: user.tipo },
         JWT_SECRET,
@@ -106,21 +110,23 @@ class AuthController {
         return res.status(400).json({ message: "El correo es obligatorio" });
       }
 
-      // busco el usuario pero respondo igual exista o no
-      // si respondiera diferente alguien podria usar esto pa saber que correos estan registrados
+      // Se busca el usuario pero la respuesta es siempre la misma, exista o no.
+      // Si se respondiera diferente según el resultado, sería posible descubrir qué correos están registrados.
       const user = await User.findByEmail(correo);
 
       if (user) {
-        // crypto.randomBytes es aleatoriedad real del SO, Math.random no sirve pa esto
+        // crypto.randomBytes genera aleatoriedad real a nivel de sistema operativo.
+        // Math.random no es suficientemente seguro para tokens de recuperación.
         const token = crypto.randomBytes(32).toString("hex");
 
-        // 1 hora en ms: Date.now() esta en ms, entonces sumo 60 * 60 * 1000
+        // El token expira en 1 hora: Date.now() está en milisegundos, por eso se suma 60 * 60 * 1000
         const expires_at = new Date(Date.now() + 60 * 60 * 1000);
 
         await ResetToken.createToken(user.id_usuario, token, expires_at);
 
-        // el link apunta al front, react lo recibe, lee el token con useParams y llama al back
-        const resetLink = `http://localhost:5173/reset-password/${token}`;
+        // El enlace apunta al frontend. React lo recibe, extrae el token con useParams
+        // y llama al servidor para completar el reset.
+        const resetLink = `${FRONTEND_URL}/reset-password/${token}`;
 
         await transporter.sendMail({
           from: `"BookSync" <${process.env.EMAIL_USER}>`,
@@ -130,7 +136,7 @@ class AuthController {
         });
       }
 
-      // respondo siempre lo mismo pa no revelar si el correo existe o no
+      // La respuesta es siempre la misma para no revelar si el correo existe o no
       return res.status(200).json({
         message: "Si ese correo esta registrado, recibiras un enlace",
       });
@@ -144,14 +150,15 @@ class AuthController {
   // RESET PASSWORD
   static async resetPassword(req, res) {
     try {
-      const { token } = req.params; // viene en la URL, no en el body
+      const { token } = req.params; // El token llega como parámetro de la URL, no en el body
       const { password } = req.body;
 
       if (!password) {
         return res.status(400).json({ message: "La contrasena es obligatoria" });
       }
 
-      // findByToken ya verifica la expiracion, si devuelve null rechazo sin preguntar mas
+      // findByToken ya valida la expiración en la misma consulta.
+      // Si devuelve null, el enlace es inválido o ya expiró.
       const resetRecord = await ResetToken.findByToken(token);
 
       if (!resetRecord) {
@@ -160,10 +167,11 @@ class AuthController {
 
       const password_hash = await bcrypt.hash(password, 10);
 
-      // el id_usuario sale del token, no del front, asi el front no puede manipular a quien afecta
+      // El id_usuario se toma del token guardado en la base de datos, no del frontend,
+      // para evitar que alguien pueda cambiar la contraseña de otro usuario.
       await User.updatePassword(resetRecord.id_usuario, password_hash);
 
-      // borro el token pa que el link no pueda reutilizarse
+      // Se elimina el token una vez usado para que el enlace del correo no pueda volver a utilizarse
       await ResetToken.deleteByToken(token);
 
       return res.status(200).json({ message: "Contrasena actualizada correctamente" });

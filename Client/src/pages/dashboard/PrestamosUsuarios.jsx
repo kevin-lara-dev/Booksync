@@ -38,7 +38,7 @@ function PrestamosUsuarios() {
     });
   };
 
-  // Si el préstamo está activo y vence en 2 días o menos → "próximo a vencer"
+  // Si el préstamo está activo y vence en 2 días o menos, se clasifica como "próximo" para mostrar una advertencia visual
   const getDisplayEstado = (prestamo) => {
     if (prestamo.estado !== "activo") return prestamo.estado;
     const diasRestantes =

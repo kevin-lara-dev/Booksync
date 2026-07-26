@@ -14,7 +14,7 @@ router.get("/profile", verifyToken, UserController.getProfile);
 // actualizar mis datos
 router.put("/profile", verifyToken, UserController.updateProfile);
 
-// cambiar mi contraseña — OJO: tiene que ir antes de /:id/... sino express lo confunde con un id
+// Esta ruta va antes de /:id/... porque Express la interpretaría como un id si no
 router.patch("/profile/password", verifyToken, UserController.changePassword);
 
 // activar o desactivar un usuario — solo admin

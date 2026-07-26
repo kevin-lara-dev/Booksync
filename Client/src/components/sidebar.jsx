@@ -9,7 +9,7 @@ function Sidebar({ onLogout }) {
     if (onLogout) {
       onLogout();
     } else {
-      // Fallback: si nadie pasó onLogout, navegar directo
+      // Si no se recibió la función onLogout, navega directamente al inicio
       navigate("/");
     }
   };
@@ -37,7 +37,7 @@ function Sidebar({ onLogout }) {
         </Link>
       </nav>
 
-      {/* admin */}
+      {/* Sección de navegación exclusiva para administradores */}
       {isAdmin && (
         <nav
           className="side-actions side-actions--admin"

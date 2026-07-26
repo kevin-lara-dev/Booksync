@@ -42,14 +42,14 @@ function InventarioAdmin (){
         cover: ""
     })
 
-    // paginación
+    // Configuración de paginación: número de libros por página y página activa
     const ITEMS_PER_PAGE = 10;
     const [currentPage, setCurrentPage] = useState(1);
 
     const {toast: logoutToast, openToast} = useLogoutToast();
     const { toast: feedbackToast, showToast } = useToast();
 
-    // ref para el input file oculto del importar CSV
+    // Referencia al input file oculto que se activa al pulsar el botón "Importar"
     const importInputRef = useRef(null);
 
 
@@ -69,7 +69,7 @@ function InventarioAdmin (){
     }, []);
 
 
-    //BUSCADOR
+    // Filtra los libros en memoria según el texto del buscador. useMemo evita recalcular en cada render.
     const filteredBooks = useMemo(() => {
         if(!search.trim()) return books;
         
@@ -98,7 +98,7 @@ function InventarioAdmin (){
     };
 
 
-    //ABRIMOS FORM
+    // Prepara el formulario para agregar un libro nuevo y lo abre vacío
     const handleAddBook = () => {
         setEditingBook(null)
         setFormData(initialFormState)
@@ -106,7 +106,7 @@ function InventarioAdmin (){
     };
 
 
-    //CREAMOS LIBRO
+    // Guarda el libro: si editingBook tiene valor actualiza, si no crea uno nuevo
     const handleSubmitBook = async () => {
         try {
 
@@ -134,7 +134,7 @@ function InventarioAdmin (){
     };
 
 
-    //EDITAMOS LIBRO
+    // Carga los datos del libro seleccionado en el formulario y lo abre en modo edición
     const handleEditBook = (book) => {
         setEditingBook(book);
         setFormData({
@@ -153,7 +153,7 @@ function InventarioAdmin (){
     }
 
 
-    //BORRAMOS BOOK
+    // Pide confirmación mediante SweetAlert2 antes de eliminar el libro (soft delete)
     const handleDeleteBook = async (book) => {
         const { isConfirmed } = await Swal.fire({
             title: "¿Eliminar libro?",
@@ -180,7 +180,7 @@ function InventarioAdmin (){
     }
 
 
-    // EXPORTAR CSV — genera el archivo en el navegador sin ir al servidor
+    // Exporta el inventario a CSV. El archivo se genera en el navegador sin necesidad de ir al servidor.
     const handleExport = () => {
         if (books.length === 0) {
             showToast("Aviso", "No hay libros en el inventario para exportar");
@@ -190,7 +190,7 @@ function InventarioAdmin (){
         const headers = ["isbn", "title", "author", "genre", "publication_year",
                          "available_quantity", "location", "status", "editorial", "description"];
 
-        // envuelvo cada valor en comillas dobles y escapo las comillas internas
+        // Envuelve cada valor en comillas dobles y escapa las comillas internas para que el CSV sea válido
         const escape = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
 
         const csvRows = [
@@ -208,12 +208,12 @@ function InventarioAdmin (){
     };
 
 
-    // IMPORTAR CSV — abre el selector de archivos
+    // Activa el input file oculto para que el usuario seleccione el archivo CSV a importar
     const handleImport = () => {
         importInputRef.current?.click();
     };
 
-    // se dispara cuando el usuario elige un archivo CSV
+    // Se ejecuta cuando el usuario elige un archivo CSV. Lee el contenido, lo parsea y lo envía al servidor.
     const handleFileChange = async (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -227,10 +227,10 @@ function InventarioAdmin (){
                 return;
             }
 
-            // primera fila = encabezados, limpios de comillas y espacios
+            // La primera fila del CSV son los encabezados; se limpian las comillas y espacios sobrantes
             const headers = lines[0].split(",").map((h) => h.replace(/"/g, "").trim());
 
-            // parseo simple: separo por coma respetando campos entre comillas
+            // Parser manual: separa por coma pero respeta campos entre comillas (para valores que contengan comas)
             const parseRow = (line) => {
                 const values = [];
                 let current = "";
@@ -251,7 +251,7 @@ function InventarioAdmin (){
                     headers.forEach((h, i) => { row[h] = values[i] ?? ""; });
                     return row;
                 })
-                .filter((row) => row.isbn?.trim() && row.title?.trim()); // descarto filas vacías
+                .filter((row) => row.isbn?.trim() && row.title?.trim()); // Descarta filas vacías o sin los campos mínimos requeridos
 
             if (parsedBooks.length === 0) {
                 showToast("Error", "No se encontraron filas válidas en el CSV (isbn y title son obligatorios)");
@@ -270,7 +270,7 @@ function InventarioAdmin (){
         } catch (error) {
             showToast("Error", "No se pudo procesar el archivo CSV");
         } finally {
-            // limpio el input pa que se pueda volver a importar el mismo archivo
+            // Limpia el input para que el usuario pueda volver a seleccionar el mismo archivo si es necesario
             e.target.value = "";
         }
     };
@@ -283,7 +283,7 @@ function InventarioAdmin (){
 
 
 
-    // cuando el usuario busca, vuelvo a la primera página pa no quedarme en una vacía
+    // Cuando el usuario busca, vuelve a la primera página para no quedarse en una página sin resultados
     useEffect(() => {
         setCurrentPage(1);
     }, [search]);
@@ -352,7 +352,7 @@ function InventarioAdmin (){
                                     <i className="fa-solid fa-file-import" aria-hidden="true" />
                                     <span>Importar</span>
                                 </button>
-                                {/* input oculto — solo acepta CSV */}
+                                {/* Input file oculto — solo acepta archivos CSV. Se activa desde el botón "Importar". */}
                                 <input
                                     ref={importInputRef}
                                     type="file"

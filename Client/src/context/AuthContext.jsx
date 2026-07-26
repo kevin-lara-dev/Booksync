@@ -1,11 +1,11 @@
 import { createContext, useContext, useMemo, useState } from "react";
 import { loginRequest } from "../services/auth.service";
 
-// contexto global de auth — cualquier componente que necesite saber si el usuario está logueado lo consume
+// Contexto global de autenticación. Cualquier componente que necesite saber si el usuario está logueado lo consume desde aquí.
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  // leo el localStorage al arrancar para que la sesión no se pierda si recargo la página
+  // Al iniciar la aplicación, recupera la sesión guardada en localStorage para que no se pierda al recargar la página
   const [currentUser, setCurrentUser] = useState(() => {
     const storedUser = localStorage.getItem("user");
     return storedUser ? JSON.parse(storedUser) : null;
@@ -13,20 +13,23 @@ export function AuthProvider({ children }) {
 
   const [token, setToken] = useState(localStorage.getItem("token"));
 
-  // llama al servicio, guarda token y usuario en localStorage y actualiza el estado
+  // Llama al servicio de login, guarda el token y el usuario en localStorage y actualiza el estado.
+  // Devuelve el usuario directamente para que Login.jsx pueda leer el rol antes de que React actualice el contexto.
   const login = async (data) => {
     const response = await loginRequest(data);
     const { user, token } = response;
 
-    //guardamos token — a partir de aqui el interceptor de api.js lo incluye en cada petición
+    // Al guardar el token aquí, el interceptor de api.js lo incluye automáticamente en cada petición posterior
     localStorage.setItem("token", token);
     localStorage.setItem("user", JSON.stringify(user));
 
     setToken(token);
     setCurrentUser(user);
+
+    return user;
   };
 
-  // limpia localStorage y resetea el estado — la app queda como si nadie estuviera logueado
+  // Limpia localStorage y resetea el estado — la app queda como si nadie estuviera logueado
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -34,7 +37,7 @@ export function AuthProvider({ children }) {
     setCurrentUser(null);
   };
 
-  // useMemo pa que el objeto no se recree en cada render y cause re-renders innecesarios
+  // useMemo evita que el objeto del contexto se recree en cada render, lo que causaría re-renders innecesarios en los componentes que lo consumen
   const value = useMemo(() => {
     return {
       currentUser,
@@ -49,7 +52,7 @@ export function AuthProvider({ children }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-// hook pa consumir el contexto — lanza error si lo uso fuera del AuthProvider
+// Hook para consumir el contexto de autenticación desde cualquier componente. Lanza un error si se usa fuera del AuthProvider.
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) {

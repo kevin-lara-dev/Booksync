@@ -1,22 +1,21 @@
 /*
-Crear libro	                create              x
-Listar libros	            findAll             x
-Obtener libro	            findById            x
-Actualizar libro	        update              x
-Eliminar (soft)             delete (soft)       x
- */
+  Modelo de libro.
+  Contiene todas las operaciones sobre la tabla "libro":
+  crear, listar con filtros, buscar por ID, obtener géneros,
+  actualizar, eliminar (soft delete) e importar en lote desde CSV.
+*/
 
 const pool = require ("../config/db")
 
 class Libro {
-    
-    //CREAR LIBRO
-    static async create({ 
-        title, 
-        author, 
-        genre, 
-        publication_year, 
-        available_quantity, 
+
+    // Inserta un nuevo libro con estado "disponible" por defecto
+    static async create({
+        title,
+        author,
+        genre,
+        publication_year,
+        available_quantity,
         location,
         isbn,
         cover,
@@ -24,8 +23,8 @@ class Libro {
         description
     }){
         const sql = `
-        INSERT INTO libro 
-        (title, author, genre, publication_year, available_quantity, location, isbn, status, cover, editorial, description) 
+        INSERT INTO libro
+        (title, author, genre, publication_year, available_quantity, location, isbn, status, cover, editorial, description)
         VALUES (?,?,?,?,?,?,?,'disponible',?,?,?)
         `;
 
@@ -33,24 +32,24 @@ class Libro {
         return result.insertId
     };
 
-    //Listar libros
+    // Devuelve todos los libros activos aplicando los filtros y el orden que lleguen
     static async findAll(filters = {}, sort = "id_libro", order = "DESC"){
-        let sql = `SELECT 
-            id_libro, 
-            title, 
-            author, 
-            genre, 
-            publication_year, 
+        let sql = `SELECT
+            id_libro,
+            title,
+            author,
+            genre,
+            publication_year,
             available_quantity,
-            location, 
-            isbn, 
+            location,
+            isbn,
             status,
             cover,
             editorial,
             description
             FROM libro WHERE status != 'inactivo'
         `;
-        
+
         const values = [];
 
         if(filters.title){
@@ -73,7 +72,7 @@ class Libro {
             values.push(filters.genre);
         }
 
-        //==ordenamiento ==
+        // Valida el campo de ordenamiento contra una lista blanca para evitar inyección SQL
         const allowedSortFields = ["id_libro", "title", "author", "publication_year"]
 
         if(!allowedSortFields.includes(sort)){
@@ -88,14 +87,14 @@ class Libro {
         return rows
     }
 
-    //BUSCAR POR ID
+    // Busca un libro activo por su ID
     static async findById(idLibro){
-        const sql = `SELECT 
-        id_libro, 
-        title, 
-        author, 
-        genre, 
-        publication_year, 
+        const sql = `SELECT
+        id_libro,
+        title,
+        author,
+        genre,
+        publication_year,
         available_quantity,
         location,
         isbn,
@@ -105,20 +104,20 @@ class Libro {
         description
         FROM libro WHERE id_libro = ? AND status != "inactivo"
         `;
-    
+
         const [rows] = await pool.query(sql, [idLibro]);
         return rows[0];
         }
 
-    //OBTENER LIRBO POR GENERO
+    // Obtiene todos los géneros distintos que existen en el catálogo
     static async getGenres (){
         const sql = `SELECT DISTINCT genre FROM libro WHERE status != "inactivo" ORDER BY genre ASC`
 
         const [rows] = await pool.query(sql)
         return rows.map(row => row.genre)
-    }    
+    }
 
-    // ACTUALIZAR USUARIO
+    // Actualiza los campos del libro que se reciban, ignorando los que vengan como undefined
     static async update (idLibro, data){
         const field = [];
         const values = [];
@@ -142,7 +141,7 @@ class Libro {
         return result.affectedRows > 0
     }
 
-    //BORRAR / DESACTIVAR USUARIO
+    // Soft delete: desactiva el libro marcándolo como "inactivo" sin eliminarlo físicamente
     static async delete(idLibro){
         const sql = `UPDATE libro SET status = 'inactivo' WHERE id_libro = ?`;
 
@@ -150,8 +149,8 @@ class Libro {
         return result.affectedRows > 0
     }
 
-    // IMPORTAR LIBROS EN LOTE — inserta uno a uno pa poder reportar cuales fallaron
-    // si hiciera un INSERT masivo un solo error tiraría todo para atrás
+    // Importación masiva: inserta los libros uno a uno para poder reportar cuáles fallaron
+    // sin cancelar todo el proceso si uno da error.
     static async bulkCreate(books) {
         const results = { created: 0, errors: [] };
 
@@ -176,7 +175,7 @@ class Libro {
                 ]);
                 results.created++;
             } catch (error) {
-                // ER_DUP_ENTRY = isbn duplicado, reporto pero sigo con los demás
+                // ER_DUP_ENTRY indica ISBN duplicado. Se reporta el error pero se continúa con el resto del lote.
                 results.errors.push({
                     isbn: book.isbn,
                     message: error.code === "ER_DUP_ENTRY"

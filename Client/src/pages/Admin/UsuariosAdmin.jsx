@@ -21,7 +21,7 @@ function UsuariosAdmin() {
   const { toast: logoutToast, openToast } = useLogoutToast();
   const { toast: feedbackToast, showToast } = useToast();
 
-  // ── Cargar usuarios ───────────────────────────────────────────
+  // Carga todos los usuarios del sistema al montar el componente
   const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
@@ -39,7 +39,7 @@ function UsuariosAdmin() {
     fetchUsers();
   }, [fetchUsers]);
 
-  // ── Cambiar estado ────────────────────────────────────────────
+  // Alterna el estado del usuario entre "activo" e "inactivo" y actualiza la lista local
   const handleChangeStatus = async (user) => {
     const nuevoEstado = user.estado === "activo" ? "inactivo" : "activo";
     setActionLoading(user.id_usuario);
@@ -57,7 +57,7 @@ function UsuariosAdmin() {
     }
   };
 
-  // ── Cambiar rol ───────────────────────────────────────────────
+  // Pide confirmación antes de cambiar el rol del usuario entre "usuario" y "administrador"
   const handleChangeRole = async (user) => {
     const nuevoRol = user.tipo === "usuario" ? "administrador" : "usuario";
 
@@ -92,7 +92,7 @@ function UsuariosAdmin() {
     }
   };
 
-  // ── Filtros ───────────────────────────────────────────────────
+  // Filtra los usuarios en memoria según búsqueda, rol y estado seleccionados
   const filteredUsers = useMemo(() => {
     let result = users;
 

@@ -28,7 +28,7 @@ function App() {
       <Route path="/Help" element={<Help />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/forgot" element={<Forgot />} />
-      {/* sin PrivateRoute — el usuario no está logueado cuando llega aquí */}
+      {/* Esta ruta no lleva PrivateRoute porque el usuario llega aquí sin sesión, desde el enlace del correo de recuperación */}
       <Route path="/reset-password/:token" element={<Reset />} />
       <Route
         path="/Home"
@@ -79,7 +79,7 @@ function App() {
         }
       />
 
-      {/* ===== RUTAS ADMIN ===== */}
+      {/* Rutas de administración — solo accesibles para usuarios con rol administrador */}
       <Route
         path="/Admin/Inventario"
         element={
@@ -118,7 +118,7 @@ function App() {
         }
       />
 
-      {/* Fallback */}
+      {/* Ruta por defecto: redirige al inicio si la URL no coincide con ninguna ruta definida */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

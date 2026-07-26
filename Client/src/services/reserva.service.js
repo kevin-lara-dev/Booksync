@@ -1,18 +1,18 @@
 import api from "./api";
 
-// mis reservas
+// Trae las reservas activas e históricas del usuario logueado
 export const getReservas = async () => {
   const { data } = await api.get(`/reservas/mis`);
   return data;
 };
 
-// crear reserva — el back verifica disponibilidad antes de crearla
+// Crea una reserva para el libro indicado. El servidor verifica disponibilidad y límite de reservas activas antes de crearla.
 export const createReserva = async (idLibro) => {
   const { data } = await api.post(`/reservas/${idLibro}`);
   return data;
 };
 
-// cancelar una de mis reservas
+// Cancela una reserva del usuario logueado y devuelve el ejemplar al stock
 export const deleteReserva = async (idReserva) => {
   const { data } = await api.delete(`/reservas/${idReserva}`);
   return data;
@@ -22,19 +22,19 @@ export const deleteReserva = async (idReserva) => {
 // ADMIN RESERVAS
 // ============================
 
-// todas las reservas del sistema
+// Trae todas las reservas del sistema (solo disponible para administradores)
 export const getReservasAdmin = async () => {
   const { data } = await api.get("/reservas/admin");
   return data;
 };
 
-// aprobar una reserva pa que el usuario pueda retirar el libro
+// Confirma una reserva para que el usuario pueda pasar a retirar el libro físicamente
 export const confirmReservaAdmin = async (idReserva) => {
   const { data } = await api.patch(`/reservas/admin/${idReserva}/confirmar`);
   return data;
 };
 
-// cancelar una reserva desde el panel admin
+// Cancela una reserva desde el panel de administración y devuelve el ejemplar al stock
 export const cancelReservaAdmin = async (idReserva) => {
   const { data } = await api.patch(`/reservas/admin/${idReserva}/cancelar`);
   return data;

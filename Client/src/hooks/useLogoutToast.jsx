@@ -1,28 +1,28 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-// hook pa el toast de confirmación de cierre de sesión
-// diferente a useToast porque este espera que el usuario confirme o cancele
-// uso: const { toast, openToast } = useLogoutToast()
-//      renderizo {toast} en el jsx y llamo openToast() desde el botón de logout del sidebar
+// Hook para el toast de confirmación de cierre de sesión.
+// A diferencia de useToast, este espera que el usuario confirme o cancele antes de actuar.
+// Uso: const { toast, openToast } = useLogoutToast()
+//      Renderiza {toast} en el JSX y llama openToast() desde el botón de logout del Sidebar.
 export function useLogoutToast() {
   const navigate = useNavigate();
   const [showToast, setShowToast] = useState(false);
 
   const openToast = () => setShowToast(true);
 
-  // el usuario canceló, cierro el toast sin hacer nada
+  // El usuario canceló: cierra el toast sin cerrar sesión
   const closeToast = () => setShowToast(false);
 
   const confirmLogout = () => {
     navigate("/");
   };
 
-  // si el usuario no toca nada en 5 segundos el toast desaparece solo sin cerrar sesión
+  // Si el usuario no toca nada en 5 segundos, el toast desaparece solo sin cerrar sesión
   useEffect(() => {
     if (!showToast) return;
     const timer = setTimeout(() => setShowToast(false), 5000);
-    return () => clearTimeout(timer); // limpio el timer si el componente se desmonta antes
+    return () => clearTimeout(timer); // Limpia el temporizador si el componente se desmonta antes de que venza
   }, [showToast]);
 
   const toast = (

@@ -1,24 +1,24 @@
 import api from "./api";
 
-// pregunto si un libro ya está en mis favoritos — devuelve { isFav: boolean }
+// Verifica si un libro ya está en favoritos del usuario logueado. Devuelve { isFav: boolean }.
 export const isFavorite = async (idLibro) => {
   const { data } = await api.get(`/favorite/${idLibro}`);
   return data;
 };
 
-// agregar a favoritos
+// Agrega un libro a favoritos del usuario logueado
 export const addFavorite = async (idLibro) => {
   const { data } = await api.post(`/favorite/${idLibro}`);
   return data;
 };
 
-// quitar de favoritos
+// Elimina un libro de favoritos del usuario logueado
 export const deleteFavorite = async (idLibro) => {
   const { data } = await api.delete(`/favorite/${idLibro}`);
   return data;
 };
 
-// traer todos mis favoritos con los datos del libro
+// Trae todos los favoritos del usuario logueado, incluyendo los datos completos de cada libro
 export const getFavorites = async () => {
   const { data } = await api.get(`/favorite`);
   return data;

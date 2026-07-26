@@ -1,7 +1,7 @@
 const Reserva = require("../models/reserva.model");
 
 class ReservaController {
-  //Crear reservas
+  // Crea una nueva reserva para el libro indicado
   static async create(req, res) {
     try {
       const idUsuario = req.user.id;
@@ -42,7 +42,7 @@ class ReservaController {
     }
   }
 
-  //LISTAR RESERVAS
+  // Devuelve todas las reservas del usuario autenticado
   static async myList(req, res) {
     try {
       const idUsuario = req.user.id;
@@ -56,7 +56,7 @@ class ReservaController {
     }
   }
 
-  //BORRAR RESERVAS
+  // Cancela una reserva activa del usuario autenticado
   static async cancel(req, res) {
     try {
       const idUsuario = req.user.id;
@@ -83,11 +83,9 @@ class ReservaController {
     }
   }
 
-  // =========================
-  // ADMIN
-  // =========================
+  // ── Métodos exclusivos para administradores ───────────────────
 
-  //listar todas las reservas admin
+  // Lista todas las reservas del sistema para el panel de administración
   static async adminList(req, res) {
     try {
       const rows = await Reserva.listAllReservasAdmin();
@@ -100,7 +98,7 @@ class ReservaController {
     }
   }
 
-  //confirmar Reservas Admin
+  // Marca una reserva como confirmada. Solo el administrador puede hacerlo.
   static async adminConfirm(req, res) {
     try {
       const idReserva = Number(req.params.idReserva);

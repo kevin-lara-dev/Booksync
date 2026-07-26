@@ -1,41 +1,41 @@
 import api from "./api";
 
-// listar libros con filtros opcionales — params es un objeto { title, genre, sort, order }
-// si no se pasan params trae todos (lo usa InventarioAdmin)
+// Lista libros con filtros opcionales — params es un objeto { title, genre, sort, order }.
+// Si no se pasan parámetros, trae todos los libros (lo usa InventarioAdmin para mostrar el inventario completo).
 export const getLibrosRequest = async (params = {}) => {
   const response = await api.get("/libros", { params });
   return response.data;
 };
 
-// detalle de un libro por id — lo usa Detalle.jsx
+// Obtiene el detalle completo de un libro por su id. Lo usa Detalle.jsx.
 export const getLibroById = async (id) => {
   const response = await api.get(`/libros/${id}`);
   return response.data;
 };
 
-// géneros únicos — lo usa Home.jsx pa el filtro de búsqueda
+// Devuelve los géneros únicos disponibles en el catálogo. Lo usa Home.jsx para el filtro de búsqueda.
 export const getGenres = async () => {
   const response = await api.get("/libros/genres");
   return response.data;
 };
 
-//CREAR LIBROS
+// Crea un libro nuevo en el inventario
 export const createLibro = async (data) => {
   const response = await api.post("/libros", data);
   return response.data;
 };
 
-//ACTUALIZAR LIBROS — acepta cambios parciales
+// Actualiza un libro existente. Acepta cambios parciales: solo se sobreescriben los campos que se envíen.
 export const updateLibro = (id, data) => {
   return api.put(`/libros/${id}`, data);
 };
 
-//BORRAR LIBROS — soft delete, no desaparece de la bd
+// Elimina un libro del catálogo visible. Es un soft delete: el registro queda en la base de datos marcado como inactivo.
 export const deleteLibro = (id) => {
   return api.delete(`/libros/${id}`);
 };
 
-// IMPORTAR LIBROS EN LOTE — recibe array de objetos parseados del CSV
+// Importa libros en lote. Recibe un array de objetos ya parseados desde el CSV en el frontend.
 export const importLibros = async (books) => {
   const response = await api.post("/libros/import", { books });
   return response.data;

@@ -1,11 +1,11 @@
 import axios from "axios";
 
-// instancia de axios con el baseURL ya configurado, la uso en todos los servicios
+// Instancia de Axios compartida por todos los servicios. Tiene el baseURL y los interceptores de autenticación configurados.
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000/api",
 });
 
-// antes de cada petición le meto el token si existe, pa no hacerlo manual en cada llamada
+// Interceptor de solicitud: adjunta el token de autenticación a cada petición automáticamente, evitando hacerlo manualmente en cada llamada
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
@@ -14,8 +14,8 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// si el servidor responde 401 y no es una ruta de auth, limpio la sesión y mando al login
-// así si el token expira la app cierra sola sin quedarse rota
+// Interceptor de respuesta: si el servidor responde 401 y no es una ruta de autenticación,
+// limpia la sesión y redirige al login. Así, si el token expira, la app cierra sola sin quedarse en un estado roto.
 api.interceptors.response.use(
   (response) => response,
   (error) => {

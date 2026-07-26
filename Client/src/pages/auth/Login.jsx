@@ -17,12 +17,18 @@ function Login() {
     e.preventDefault();
 
     try {
-      await login({
+      // login() devuelve el usuario directamente para poder leer el rol antes de que React actualice el contexto
+      const user = await login({
         correo: email,
         password,
       });
 
-      navigate("/Home");
+      // Redirige según el rol: el administrador va al panel de gestión, el usuario común va al catálogo
+      if (user.role === "administrador") {
+        navigate("/Admin/Inventario");
+      } else {
+        navigate("/Home");
+      }
     } catch (err) {
       showToast("Error", "Correo o contraseña incorrectos");
     }

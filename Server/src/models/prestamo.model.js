@@ -27,7 +27,7 @@ class Prestamo {
           "Solo reservas confirmadas pueden convertirse en préstamo",
         );
 
-      // devolucion plazo límite (7 días)
+      // El plazo de devolución es de 7 días a partir de la fecha del préstamo
       const [result] = await conn.query(
         `INSERT INTO prestamo (id_reserva, id_usuario, id_libro, fecha_devolucion)
          VALUES (?, ?, ?, NOW() + INTERVAL 7 DAY)`,

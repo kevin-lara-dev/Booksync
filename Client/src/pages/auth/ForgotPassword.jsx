@@ -15,10 +15,10 @@ function ForgotPassword() {
     setLoading(true);
 
     try {
-      // llamo al back — siempre responde 200, no revela si el correo existe o no
+      // El servidor siempre responde 200, sin revelar si el correo existe o no. Esto evita que alguien averigüe qué correos están registrados.
       await forgotPasswordRequest(correo);
 
-      // navego a la pantalla de confirmación pasando el correo pa mostrárselo al usuario
+      // Navega a la pantalla de confirmación pasando el correo para mostrárselo al usuario
       navigate("/forgot", { state: { email: correo } });
 
     } catch (error) {

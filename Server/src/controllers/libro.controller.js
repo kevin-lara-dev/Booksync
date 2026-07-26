@@ -2,12 +2,12 @@ const Libro = require("../models/libro.model");
 
 class LibroController {
 
-  //CREAMOS LIBROS
+  // Crea un nuevo libro en el catálogo
   static async createLibro(req, res) {
     try {
       const { title, author, genre, publication_year, available_quantity, location, isbn, cover, editorial, description } = req.body;
 
-      // uso === undefined en available_quantity porque 0 es válido y !0 daría true
+      // Se usa === undefined para available_quantity porque 0 es un valor válido y !0 devolvería true erróneamente
       if (!title || !author || !genre || !publication_year || available_quantity === undefined || !location || !isbn || !cover || !editorial || !description) {
         return res.status(400).json({ message: "Todos los campos son requeridos" });
       }
@@ -17,7 +17,7 @@ class LibroController {
       return res.status(201).json({ message: "Libro creado correctamente", libroId });
 
     } catch (error) {
-      // mysql manda ER_DUP_ENTRY cuando el isbn ya existe en la tabla
+      // MySQL lanza ER_DUP_ENTRY cuando el ISBN ya existe en la tabla
       if (error.code === "ER_DUP_ENTRY") {
         return res.status(409).json({ message: "Ya existe un libro con ese ISBN" });
       }
@@ -27,10 +27,10 @@ class LibroController {
   }
 
 
-  //LISTAMOS LIBROS
+  // Devuelve todos los libros activos, aplicando filtros opcionales de título, autor, ISBN o género
   static async getAllLibros(req, res) {
     try {
-      // los filtros son opcionales, si no llegan findAll devuelve todo
+      // Los filtros son opcionales; si no se envían, findAll devuelve todos los libros
       const filters = {
         title: req.query.title,
         author: req.query.author,
@@ -38,7 +38,7 @@ class LibroController {
         genre: req.query.genre,
       };
 
-      // por defecto ordeno por id desc pa que los más recientes salgan primero
+      // Por defecto se ordena por id descendente para que los libros más recientes aparezcan primero
       const sort = req.query.sort || "id_libro";
       const order = req.query.order === "ASC" ? "ASC" : "DESC";
 
@@ -52,7 +52,7 @@ class LibroController {
   }
 
 
-  //OBTENEMOS LIBRO POR ID — lo uso en la pagina de detalle
+  // Busca un libro por su ID. Lo usa la página de detalle del libro.
   static async getLibroById(req, res) {
     try {
       const { id } = req.params;
@@ -71,7 +71,7 @@ class LibroController {
   }
 
 
-  //OBTENER GÉNEROS — devuelve los géneros distintos que hay en la bd
+  // Devuelve los géneros distintos que existen en el catálogo
   static async getGenres(req, res) {
     try {
       const genres = await Libro.getGenres();
@@ -83,13 +83,13 @@ class LibroController {
   }
 
 
-  // Actualizar libro — solo actualizo los campos que lleguen, no toco los demás
+  // Solo actualiza los campos que llegaron en la petición; los demás no se modifican
   static async updateLibro(req, res) {
     try {
       const { id } = req.params;
       const { title, author, genre, publication_year, available_quantity, location, isbn, status, cover, editorial, description } = req.body;
 
-      // si no llegó ningún campo no tiene sentido hacer la query
+      // Si no llegó ningún campo no tiene sentido hacer la consulta
       if (
         title === undefined && author === undefined && genre === undefined &&
         publication_year === undefined && available_quantity === undefined &&
@@ -101,7 +101,7 @@ class LibroController {
 
       const updated = await Libro.update(id, { title, author, genre, publication_year, available_quantity, location, isbn, status, cover, editorial, description });
 
-      // el modelo devuelve false si no encontró el libro o no hubo cambios reales
+      // El modelo devuelve false si no encontró el libro o no hubo cambios reales
       if (!updated) {
         return res.status(404).json({ message: "Libro no encontrado o sin cambios" });
       }
@@ -114,7 +114,7 @@ class LibroController {
   }
 
 
-  // IMPORTAR LIBROS EN LOTE — recibe un array de libros parseado del CSV en el front
+  // Importación masiva de libros. Recibe un array de libros que el frontend parseó del CSV.
   static async importLibros(req, res) {
     try {
       const { books } = req.body;
@@ -123,7 +123,7 @@ class LibroController {
         return res.status(400).json({ message: "No se enviaron libros para importar" });
       }
 
-      // el modelo inserta uno a uno y acumula errores sin frenar todo el lote
+      // El modelo inserta uno a uno y acumula los errores sin detener el resto del lote
       const results = await Libro.bulkCreate(books);
 
       return res.status(200).json({
@@ -138,7 +138,7 @@ class LibroController {
   }
 
 
-  //borrar libro — soft delete, no lo borro fisicamente, solo lo pongo inactivo
+  // Soft delete: no se elimina el libro físicamente, solo se marca como inactivo
   static async deleteLibro(req, res) {
     try {
       const { id } = req.params;

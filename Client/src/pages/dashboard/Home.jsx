@@ -4,14 +4,14 @@ import Sidebar from "../../components/sidebar";
 import { useLogoutToast } from "../../hooks/useLogoutToast";
 import { getLibrosRequest, getGenres } from "../../services/libro.service";
 
-// URL base del server pa las portadas — va de .env pa no tenerla hardcodeada
+// URL base del servidor para construir las rutas de las portadas. Se toma del .env para no tenerla escrita fija en el código.
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
 
 
 function Home() {
   const navigate = useNavigate();
   
-  // ==== Estado búsqueda ====
+  // Estado del buscador y sus filtros
   const [query, setQuery] = useState("");
   const [libros, setLibros] = useState([]);
   const [recentBooks, setRecentBooks] = useState([]);
@@ -21,14 +21,14 @@ function Home() {
   const [sortOrder, setSortOrder] = useState("ASC");
   const [genres, setGenres] = useState([]);
 
-  // ==== Estado carrusel ====
+  // Estado del carrusel de destacados
   const [currentIndex, setCurrentIndex] = useState(0); 
   const trackRef = useRef(null);
   
-  // ==== Hook de logout (toast global) ====
+  // Hook del toast de cierre de sesión
   const { toast, openToast } = useLogoutToast();
 
-  // ==== Función para obtener libros desde la API ====
+  // Obtiene libros desde la API según los filtros actuales (búsqueda, género, orden)
   const fetchLibros = async (search = "") => {
     try {
       const data = await getLibrosRequest({
@@ -41,7 +41,7 @@ function Home() {
     } catch (error) {}
   }
   
-  // ==== Lógica de búsqueda ====
+  // Espera 400ms después de que el usuario deja de escribir antes de buscar (debounce), para no lanzar una petición por cada tecla
   useEffect(() => {
     const delay = setTimeout(() => {
       if(query.trim().length === 0 ){
@@ -57,7 +57,7 @@ function Home() {
     return () => clearTimeout(delay);
   }, [query, selectedGenre, sortField, sortOrder]);
 
-// === Obtener libros recientes para el carrusel ====
+  // Obtiene los 8 libros más recientes del catálogo para mostrarlos en el carrusel de destacados
   useEffect(() => {
     const fetchRecentBooks = async () => {
       try {
@@ -71,7 +71,7 @@ function Home() {
   }, []);
 
 
-  /// ==== Auto-rotación del carrusel ==== DISEÑO
+  // Auto-rotación del carrusel: avanza una tarjeta cada 4 segundos de forma automática
   useEffect(() => {
   if (recentBooks.length === 0) return;
 
@@ -86,7 +86,7 @@ function Home() {
 
 
 
-  // ==== Scroll del carrusel cuando cambia el índice ====
+  // Cada vez que el índice activo cambia, desplaza suavemente el carrusel para centrar esa tarjeta
   useEffect(() => {
     const track = trackRef.current;
     if (!track) return;
@@ -100,7 +100,7 @@ function Home() {
     }
   }, [currentIndex]);
 
-  // ==== ordenamiento de genero  ====
+  // Carga los géneros disponibles en la base de datos para poblar el selector de filtros
   useEffect(() => {
     const fetchGenres = async () => {
       try {
@@ -132,8 +132,7 @@ function Home() {
   };
 
   const handleCardClick = (book) => {
-    localStorage.setItem("selectedBook", JSON.stringify(book));
-    navigate(`/detalle/${book.id_libro}`);
+    navigate(`/Detalle/${book.id_libro}`);
   };
 
 

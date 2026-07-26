@@ -33,7 +33,7 @@ function Detalle() {
   useEffect(() => {
     const fetchBook = async () => {
       try {
-        // getLibroById usa api.js — token va automático por el interceptor
+        // getLibroById usa la instancia de api.js — el interceptor adjunta el token automáticamente
         const data = await getLibroById(id);
         setBook(data);
 
@@ -123,7 +123,7 @@ function Detalle() {
   const handleShare = async () => {
     const url = window.location.href;
 
-    // Web Share API disponible en mobile y algunos browsers de escritorio
+    // Web Share API: disponible en móvil y algunos navegadores de escritorio modernos
     if (navigator.share) {
       try {
         await navigator.share({
@@ -132,12 +132,12 @@ function Detalle() {
           url,
         });
       } catch (err) {
-        // el usuario canceló el diálogo, no hago nada
+        // El usuario canceló el diálogo nativo de compartir, no se hace nada
       }
       return;
     }
 
-    // fallback: copiar al portapapeles
+    // Fallback: si Web Share API no está disponible, copia el enlace al portapapeles
     try {
       await navigator.clipboard.writeText(url);
       showToast("Enlace copiado", "El link del libro se copió al portapapeles");

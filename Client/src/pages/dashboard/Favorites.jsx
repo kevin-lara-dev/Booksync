@@ -39,12 +39,12 @@ function Favorites() {
     }
   };
 
-  //detalle
+  // Navega a la página de detalle del libro seleccionado
   const handleDetalle = (idLibro) => {
-    navigate(`/detalle/${idLibro}`);
+    navigate(`/Detalle/${idLibro}`);
   };
 
-  //quitar favorito
+  // Quita el libro de favoritos y lo elimina de la lista local sin recargar desde el servidor
   const handleQuitarFavorito = async (idLibro) => {
     try {
       await deleteFavorite(idLibro);
@@ -54,7 +54,7 @@ function Favorites() {
     }
   };
 
-  //llamada de favoritos
+  // Carga los favoritos del usuario al montar el componente
   useEffect(() => {
     const fetchFavs = async () => {
       try {
@@ -71,7 +71,7 @@ function Favorites() {
     fetchFavs();
   }, []);
 
-  //renderizar disponibles
+  // Muestra el estado de disponibilidad del libro: inactivo, dañado, disponible para reservar o sin stock
   const renderDisponibilidad = (status, availableQty) => {
     if (status === "inactivo")
       return (

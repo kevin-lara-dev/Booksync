@@ -1,42 +1,42 @@
 import api from "./api";
 
-// todos los usuarios — solo admin
+// Trae todos los usuarios del sistema. Solo disponible para administradores.
 export const getAllUsers = async () => {
   const { data } = await api.get("/users");
   return data;
 };
 
-// activar o desactivar un usuario
+// Activa o desactiva un usuario. El estado que llegue ("activo" / "inactivo") es el que se aplica.
 export const changeUserStatus = async (id, estado) => {
   const { data } = await api.patch(`/users/${id}/status`, { estado });
   return data;
 };
 
-// cambiar rol entre "usuario" y "administrador"
+// Cambia el rol de un usuario entre "usuario" y "administrador"
 export const changeUserRole = async (id, tipo) => {
   const { data } = await api.patch(`/users/${id}/role`, { tipo });
   return data;
 };
 
-// mis datos de perfil (sin contraseña)
+// Trae los datos de perfil del usuario logueado (sin contraseña)
 export const getProfile = async () => {
   const { data } = await api.get("/users/profile");
   return data;
 };
 
-// actualizar mis datos — solo mando los que cambiaron
+// Actualiza los datos del perfil. Solo se envían los campos que cambiaron; los demás no se tocan.
 export const updateProfile = async (profileData) => {
   const { data } = await api.put("/users/profile", profileData);
   return data;
 };
 
-// cambio de contraseña — requiere la actual pa confirmar que soy yo
+// Cambia la contraseña. Requiere la contraseña actual para confirmar que es el propio usuario quien lo solicita.
 export const changePassword = async (passwordActual, passwordNueva) => {
   const { data } = await api.patch("/users/profile/password", { passwordActual, passwordNueva });
   return data;
 };
 
-// desactivar mi cuenta (soft delete)
+// Desactiva la cuenta del usuario logueado. Es un soft delete: el registro permanece en la base de datos.
 export const deleteProfile = async () => {
   const { data } = await api.delete("/users/profile");
   return data;

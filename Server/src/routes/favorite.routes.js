@@ -7,7 +7,7 @@ const router = express.Router();
 // todos mis favoritos con datos del libro
 router.get("/", verifyToken, FavoritoController.getFavorites);
 
-// solo los ids — pa saber qué corazones pintar activos en el ui sin traer todo
+// Devuelve solo los IDs de los favoritos. Permite saber qué corazones mostrar como activos sin cargar todos los datos.
 router.get("/ids", verifyToken, FavoritoController.getFavoritesId);
 
 // verificar si un libro específico ya está en mis favoritos

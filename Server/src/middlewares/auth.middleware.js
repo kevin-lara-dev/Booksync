@@ -2,16 +2,16 @@ const jwt = require("jsonwebtoken");
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// pongo esto antes de cada ruta privada pa asegurarme que el usuario tiene un token válido
+// Middleware que protege las rutas privadas. Verifica que la petición incluya un token JWT válido.
 const verifyToken = (req, res, next) => {
-  // el token llega así: "Bearer eyJhbGci..."
+  // El token llega en el header Authorization con el formato "Bearer <token>"
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
     return res.status(401).json({ message: "Token no proporcionado" });
   }
 
-  // me quedo solo con la parte del token, sin el "Bearer"
+  // Extrae solo el token, descartando el prefijo "Bearer"
   const token = authHeader.split(" ")[1];
 
   if (!token) {
@@ -19,9 +19,9 @@ const verifyToken = (req, res, next) => {
   }
 
   try {
-    // si el token expiró o la firma no cuadra, esto lanza un error
+    // Si el token expiró o la firma no corresponde, jwt.verify lanza un error que se captura abajo
     const decoded = jwt.verify(token, JWT_SECRET);
-    // guardo el payload en req.user pa que los controllers lo puedan usar
+    // Guarda el payload decodificado en req.user para que los controllers puedan leerlo
     req.user = decoded;
     next();
   } catch (error) {

@@ -1,7 +1,7 @@
 const pool = require("../config/db");
 
 class Reserva {
-  //EXPIRAR RESERVAS
+  // Marca como expiradas las reservas que superaron su fecha límite y devuelve los libros al stock
   static async expireReservas(conn) {
     const [expired] = await conn.query(
       `SELECT id_reserva, id_libro FROM reserva WHERE estado = 'activa' AND expires_at < NOW()`,
@@ -21,17 +21,17 @@ class Reserva {
     }
   }
 
-  //CREAR RESERVA
+  // Crea una reserva dentro de una transacción. Valida límites, stock y duplicados antes de confirmar.
   static async createReserva(idUsuario, idLibro) {
     const conn = await pool.getConnection();
 
     try {
       await conn.beginTransaction();
 
-      //Expiramos reservas vencidas antes de validar
+      // Expira las reservas vencidas antes de validar para trabajar con datos actualizados
       await this.expireReservas(conn);
 
-      //verificamos limite
+      // Verifica que el usuario no supere el límite de 3 reservas activas simultáneas
       const [[{ total }]] = await conn.query(
         `SELECT COUNT(*) as total FROM reserva WHERE id_usuario = ? AND estado = 'activa'`,
         [idUsuario],
@@ -69,13 +69,13 @@ class Reserva {
         throw new Error("No hay ejemplares disponibles");
       }
 
-      //Descontar stock
+      // Descuenta una unidad del stock disponible del libro
       await conn.query(
         `UPDATE libro SET available_quantity =  available_quantity - 1 WHERE id_libro = ?`,
         [idLibro],
       );
 
-      //insertar reserva
+      // Inserta la reserva con una vigencia de 32 horas a partir de este momento
       const [result] = await conn.query(
         `INSERT INTO reserva (id_usuario, id_libro, expires_at) VALUES (?, ?, NOW() + INTERVAL 32 HOUR)`,
         [idUsuario, idLibro],
@@ -95,7 +95,7 @@ class Reserva {
     }
   }
 
-  //LISTAR RESERVAS
+  // Devuelve todas las reservas del usuario, ordenadas de más reciente a más antigua
   static async listMisReservas(idUsuario) {
     const conn = await pool.getConnection();
 
@@ -119,7 +119,7 @@ class Reserva {
     }
   }
 
-  //CANCELAR RESERVA
+  // Cancela una reserva activa del usuario y devuelve el ejemplar al stock del libro
   static async cancelReserva(idUsuario, idReserva) {
     const conn = await pool.getConnection();
 
@@ -144,7 +144,7 @@ class Reserva {
         throw new Error("Solo reservas activas pueden cancelarse");
       }
 
-      //CAMBIAR ESTADO
+      // Marca la reserva como cancelada y registra la fecha de cancelación
       await conn.query(
         `
         UPDATE reserva
@@ -154,7 +154,7 @@ class Reserva {
         [idReserva],
       );
 
-      //DEVOLVER STOCK
+      // Devuelve el ejemplar al stock del libro
       await conn.query(
         `
         UPDATE libro 
@@ -215,7 +215,7 @@ class Reserva {
     }
   }
 
-  //Confirmar reserva (admin)
+  // Confirma una reserva activa. Solo puede hacerlo un administrador.
   static async confirmReservaAdmin(idReserva) {
     const conn = await pool.getConnection();
 
@@ -262,7 +262,7 @@ class Reserva {
     }
   }
 
-  // Cancelar reserva desde admin
+  // Cancela una reserva activa desde el panel de administración y devuelve el libro al stock
   static async cancelReservaAdmin(idReserva) {
     const conn = await pool.getConnection();
 
