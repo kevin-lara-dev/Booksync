@@ -19,6 +19,17 @@ export const getGenres = async () => {
   return response.data;
 };
 
+// Sube la portada de un libro a Cloudflare R2 y devuelve { url } con la URL pública resultante
+export const uploadCover = async (file) => {
+  const formData = new FormData();
+  formData.append("cover", file);
+
+  const response = await api.post("/libros/upload-cover", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+};
+
 // Crea un libro nuevo en el inventario
 export const createLibro = async (data) => {
   const response = await api.post("/libros", data);

@@ -42,4 +42,18 @@ app.use("/api/reservas", reservaRoutes);
 
 app.use("/api/prestamos", prestamoRoutes);
 
+// Manejador de errores centralizado — asegura que siempre se responda JSON (nunca el HTML por defecto de Express),
+// tanto para errores de Multer (archivo inválido, tamaño excedido) como para cualquier otro error no controlado.
+app.use((err, req, res, next) => {
+  if (err.name === "MulterError") {
+    return res.status(400).json({ message: err.message });
+  }
+
+  if (err) {
+    return res.status(400).json({ message: err.message });
+  }
+
+  next();
+});
+
 module.exports = app;

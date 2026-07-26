@@ -6,8 +6,7 @@ import { useToast } from "../../hooks/useToast";
 
 import { getFavorites, deleteFavorite } from "../../services/favorito.service";
 import { createReserva } from "../../services/reserva.service";
-
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
+import { getCoverUrl } from "../../utils/coverUrl";
 
 function Favorites() {
   const navigate = useNavigate();
@@ -134,7 +133,7 @@ function Favorites() {
             )}
             <div className="favoritos-grid">
               {favorites.map((libro) => {
-                const coverUrl = `${SERVER_URL}${libro.cover}`;
+                const coverUrl = getCoverUrl(libro.cover);
 
                 return (
                   <article key={libro.id_libro} className="favorito-card">

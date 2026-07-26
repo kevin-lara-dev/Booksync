@@ -1,10 +1,10 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
 import Sidebar from "../../components/sidebar"
 import {useLogoutToast} from "../../hooks/useLogoutToast"
 import { useToast } from "../../hooks/useToast";
 import { getLibrosRequest, createLibro, updateLibro, deleteLibro, importLibros } from "../../services/libro.service";
+import { getCoverUrl } from "../../utils/coverUrl";
 import BookFormModal from "./BookFormModal";
 import Swal from "sweetalert2";
 
@@ -446,7 +446,7 @@ function InventarioAdmin (){
                                                 <td>
                                                     {book.cover && (
                                                         <img
-                                                        src={`${SERVER_URL}${book.cover}`}
+                                                        src={getCoverUrl(book.cover)}
                                                         alt={book.title}
                                                         width="40"
                                                         style={{ borderRadius: "4px" }}

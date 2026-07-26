@@ -1,6 +1,23 @@
 const Libro = require("../models/libro.model");
+const { uploadCoverToR2 } = require("../utils/r2.util");
 
 class LibroController {
+
+  // Sube la portada de un libro a Cloudflare R2 y devuelve la URL pública resultante
+  static async uploadCover(req, res) {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No se envió ningún archivo" });
+      }
+
+      const url = await uploadCoverToR2(req.file);
+
+      return res.status(201).json({ url });
+
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+  }
 
   // Crea un nuevo libro en el catálogo
   static async createLibro(req, res) {

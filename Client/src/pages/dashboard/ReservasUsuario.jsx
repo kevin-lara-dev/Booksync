@@ -3,8 +3,7 @@ import Sidebar from "../../components/sidebar";
 import { useLogoutToast } from "../../hooks/useLogoutToast";
 import { useToast } from "../../hooks/useToast";
 import { getReservas, deleteReserva } from "../../services/reserva.service";
-
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
+import { getCoverUrl } from "../../utils/coverUrl";
 
 function ReservasUsuario() {
   const { toast: logoutToast, openToast } = useLogoutToast();
@@ -215,7 +214,7 @@ function ReservasUsuario() {
 
             <div className="reservas-grid">
               {reservas.map((reserva) => {
-                const portada = `${SERVER_URL}${reserva.cover}`;
+                const portada = getCoverUrl(reserva.cover);
 
                 return (
                   <article key={reserva.id_reserva} className="reserva-card">

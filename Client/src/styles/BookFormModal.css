@@ -15,6 +15,8 @@
     transform: translate(-50%, -50%);
     width: 100%;
     max-width: 520px;
+    max-height: 88vh;
+    overflow-y: auto;
     background: rgba(36, 20, 4, 0.75);
     border-radius: 22px;
     padding: 26px 28px 24px;
@@ -105,6 +107,58 @@
 .modal-grid input:focus {
     border-color: #f7d470;
     box-shadow: 0 0 0 2px rgba(247, 212, 112, 0.35);
+}
+
+  /* Campo de portada: ocupa el ancho completo, igual que descripción/ISBN */
+.cover-upload-field {
+    grid-column: span 2;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+  /* El input real queda oculto, el <label> que lo envuelve hace de botón */
+.cover-upload-field input[type="file"] {
+    display: none;
+}
+
+.cover-upload-field .cover-upload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(248, 237, 210, 0.95);
+    border: 1px dashed rgba(0, 0, 0, 0.4);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    color: #2a1b08;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+}
+
+.cover-upload-field .cover-upload-btn:hover {
+    border-color: #f7d470;
+}
+
+  /* Miniatura fija — nunca crece más que esto, sin importar el tamaño real de la imagen */
+.cover-preview {
+    width: 90px;
+    height: 130px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 215, 120, 0.35);
+    flex-shrink: 0;
+}
+
+.cover-upload-status {
+    font-size: 0.78rem;
+    color: #f7d470;
+}
+
+.cover-upload-error {
+    font-size: 0.78rem;
+    color: #ff8a8a;
 }
 
   /* Acciones */

@@ -2,8 +2,12 @@ const express = require("express");
 const LibroController = require("../controllers/libro.controller");
 const verifyToken = require("../middlewares/auth.middleware");
 const isAdmin = require("../middlewares/role.middleware");
+const upload = require("../middlewares/upload.middleware");
 
 const router = express.Router();
+
+// sube la portada de un libro a R2 — solo admin. Va antes de "/" para no chocar con la creación del libro.
+router.post("/upload-cover", verifyToken, isAdmin, upload.single("cover"), LibroController.uploadCover);
 
 // crear libro — solo admin
 router.post("/", verifyToken, isAdmin, LibroController.createLibro);

@@ -8,9 +8,9 @@ import {
   cancelReservaAdmin,
 } from "../../services/reserva.service";
 import { crearPrestamo } from "../../services/prestamo.service";
+import { getCoverUrl } from "../../utils/coverUrl";
 
 const ITEMS_POR_PAGINA = 10;
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
 
 function ReservasAdmin() {
   const [reservas, setReservas] = useState([]);
@@ -529,7 +529,7 @@ function ReservasAdmin() {
                         <td>
                           {res.cover && (
                             <img
-                              src={`${SERVER_URL}${res.cover}`}
+                              src={getCoverUrl(res.cover)}
                               alt={res.title}
                               width="40"
                               style={{ borderRadius: "4px" }}

@@ -1,5 +1,8 @@
+import { useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import "../../styles/BookFormModal.css";
+import { uploadCover } from "../../services/libro.service";
+import { getCoverUrl } from "../../utils/coverUrl";
 
 export default function BookFormModal({
     open,
@@ -9,6 +12,26 @@ export default function BookFormModal({
     onSubmit,
     isEditing,
 }){
+    const [uploading, setUploading] = useState(false);
+    const [uploadError, setUploadError] = useState("");
+
+    const handleCoverChange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setUploadError("");
+        setUploading(true);
+
+        try {
+            const { url } = await uploadCover(file);
+            setFormData({ ...formData, cover: url });
+        } catch (error) {
+            setUploadError(error.response?.data?.message || "Error al subir la portada");
+        } finally {
+            setUploading(false);
+        }
+    };
+
     return (
         <Dialog.Root open = {open} onOpenChange={onOpenChange}>
             <Dialog.Portal>
@@ -104,14 +127,29 @@ export default function BookFormModal({
                             }
                         />         
                         
-                        <input
-                            placeholder="URL de la portada (/uploads/libros/ejemplo.jpg)"
-                            value={formData.cover || ""}
-                            onChange={(e) =>
-                                setFormData({ ...formData, cover: e.target.value })
-                            }
-                        />   
-                                    
+                        <div className="cover-upload-field">
+                            <label className="cover-upload-btn">
+                                <span>{uploading ? "Subiendo..." : "Elegir imagen"}</span>
+                                <input
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp"
+                                    onChange={handleCoverChange}
+                                    disabled={uploading}
+                                />
+                            </label>
+
+                            {formData.cover && (
+                                <img
+                                    src={getCoverUrl(formData.cover)}
+                                    alt="Vista previa de la portada"
+                                    className="cover-preview"
+                                />
+                            )}
+
+                            {uploading && <span className="cover-upload-status">Subiendo portada...</span>}
+                            {uploadError && <span className="cover-upload-error">{uploadError}</span>}
+                        </div>
+
                         </div>
 
                         <div className="modal-actions">
@@ -121,7 +159,7 @@ export default function BookFormModal({
                                 </button>
                             </Dialog.Close>
 
-                            <button type="submit" className="inv-btn inv-btn--primary">
+                            <button type="submit" className="inv-btn inv-btn--primary" disabled={uploading}>
                                 Guardar
                             </button>
                         </div>

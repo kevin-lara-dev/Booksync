@@ -3,8 +3,7 @@ import Sidebar from "../../components/sidebar";
 import { useLogoutToast } from "../../hooks/useLogoutToast";
 import { useToast } from "../../hooks/useToast";
 import { getMisPrestamos } from "../../services/prestamo.service";
-
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
+import { getCoverUrl } from "../../utils/coverUrl";
 
 function PrestamosUsuarios() {
   const { toast: logoutToast, openToast } = useLogoutToast();
@@ -154,7 +153,7 @@ function PrestamosUsuarios() {
             <div className="prestamos-grid">
               {prestamos.map((prestamo) => {
                 const display = getDisplayEstado(prestamo);
-                const portada = `${SERVER_URL}${prestamo.cover}`;
+                const portada = getCoverUrl(prestamo.cover);
 
                 return (
                   <article key={prestamo.id_prestamo} className="prestamo-card">

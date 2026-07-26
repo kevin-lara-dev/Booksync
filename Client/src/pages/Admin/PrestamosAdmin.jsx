@@ -6,9 +6,9 @@ import {
   getPrestamosAdmin,
   devolverPrestamo,
 } from "../../services/prestamo.service";
+import { getCoverUrl } from "../../utils/coverUrl";
 
 const ITEMS_POR_PAGINA = 10;
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
 
 function PrestamosAdmin() {
   const [prestamos, setPrestamos] = useState([]);
@@ -186,7 +186,7 @@ function PrestamosAdmin() {
                         <td>
                           {p.cover && (
                             <img
-                              src={`${SERVER_URL}${p.cover}`}
+                              src={getCoverUrl(p.cover)}
                               alt={p.title}
                               width="40"
                               style={{ borderRadius: "4px" }}

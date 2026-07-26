@@ -10,8 +10,7 @@ import {
 import { createReserva } from "../../services/reserva.service";
 import { getLibroById } from "../../services/libro.service";
 import Sidebar from "../../components/sidebar";
-
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
+import { getCoverUrl } from "../../utils/coverUrl";
 
 function Detalle() {
   const navigate = useNavigate();
@@ -69,7 +68,7 @@ function Detalle() {
 
   const formattedStatus = statusMap[book.status] || "Desconocido";
   if (!book) return null;
-  const coverPath = `${SERVER_URL}${book.cover}`;
+  const coverPath = getCoverUrl(book.cover);
 
   const handleReserve = async () => {
     try {

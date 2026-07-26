@@ -3,10 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/sidebar";
 import { useLogoutToast } from "../../hooks/useLogoutToast";
 import { getLibrosRequest, getGenres } from "../../services/libro.service";
-
-// URL base del servidor para construir las rutas de las portadas. Se toma del .env para no tenerla escrita fija en el código.
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
-
+import { getCoverUrl } from "../../utils/coverUrl";
 
 function Home() {
   const navigate = useNavigate();
@@ -186,7 +183,7 @@ function Home() {
                     onClick={() => handleCardClick(book)}
                   >
                     <figure className="cover">
-                      <img src={`${SERVER_URL}${book.cover}`} alt={`Portada de ${book.title}`} />
+                      <img src={getCoverUrl(book.cover)} alt={`Portada de ${book.title}`} />
                     </figure>
                     <div className="book-title">{book.title}</div>
                     <div className="book-author">({book.author})</div>
@@ -305,7 +302,7 @@ function Home() {
                 >
                   <figure>
                     <img
-                      src={`${SERVER_URL}${book.cover}`} alt={`Portada de ${book.title}`}
+                      src={getCoverUrl(book.cover)} alt={`Portada de ${book.title}`}
                     />
                   </figure> 
                   <div className="rc-meta">
