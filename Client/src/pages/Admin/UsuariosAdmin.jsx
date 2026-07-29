@@ -114,6 +114,31 @@ function UsuariosAdmin() {
     return result;
   }, [users, search, roleFilter, statusFilter]);
 
+  // Genera y descarga un archivo CSV con los usuarios que están visibles según los filtros activos
+  const handleExportUsers = () => {
+    if (filteredUsers.length === 0) {
+      showToast("Aviso", "No hay usuarios para exportar");
+      return;
+    }
+
+    const headers = ["nombre", "apellido", "correo", "tipo", "estado", "tipo_documento", "numero_documento"];
+
+    const escape = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+
+    const csvRows = [
+      headers.join(","),
+      ...filteredUsers.map((u) => headers.map((h) => escape(u[h])).join(",")),
+    ];
+
+    const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `usuarios_booksync_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   // ── Render ────────────────────────────────────────────────────
   return (
     <div className="users-admin-page">
@@ -124,6 +149,13 @@ function UsuariosAdmin() {
           <section className="users-admin-panel">
             <header className="users-admin-header">
               <h1 className="users-admin-title">Usuarios</h1>
+
+              <div className="users-admin-header-actions">
+                <button type="button" className="users-btn users-btn--primary" onClick={handleExportUsers}>
+                  <i className="fa-solid fa-file-export" aria-hidden="true" />
+                  <span>Exportar</span>
+                </button>
+              </div>
             </header>
 
             {/* Búsqueda */}

@@ -12,6 +12,9 @@ const router = express.Router();
 // ver todas las reservas del sistema
 router.get("/admin", verifyToken, isAdmin, ReservaController.adminList);
 
+// crear una reserva a nombre de cualquier usuario
+router.post("/admin", verifyToken, isAdmin, ReservaController.adminCreate);
+
 // confirmar una reserva
 router.patch("/admin/:idReserva/confirmar", verifyToken, isAdmin, ReservaController.adminConfirm);
 

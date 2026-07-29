@@ -9,6 +9,7 @@ import {
 } from "../../services/reserva.service";
 import { crearPrestamo } from "../../services/prestamo.service";
 import { getCoverUrl } from "../../utils/coverUrl";
+import NuevaReservaModal from "./NuevaReservaModal";
 
 const ITEMS_POR_PAGINA = 10;
 
@@ -23,6 +24,7 @@ function ReservasAdmin() {
   const [filtroFecha, setFiltroFecha] = useState("");
   const [filtroUsuario, setFiltroUsuario] = useState("");
   const [filtroGenero, setFiltroGenero] = useState("");
+  const [showNuevaReserva, setShowNuevaReserva] = useState(false);
   const { toast: logoutToast, openToast } = useLogoutToast();
   const { toast: feedbackToast, showToast } = useToast();
 
@@ -291,10 +293,7 @@ function ReservasAdmin() {
     }
   };
 
-  const handleNuevaReserva = () =>
-    showToast("Aviso", "Esta acción se puede implementar después.");
-  const handleHistorial = () =>
-    showToast("Aviso", "Esta acción se puede implementar después.");
+  const handleNuevaReserva = () => setShowNuevaReserva(true);
 
   // Genera y descarga un archivo CSV con las reservas que están visibles según los filtros activos
   const handleExportar = () => {
@@ -365,14 +364,6 @@ function ReservasAdmin() {
                 >
                   <i className="fa-solid fa-plus" aria-hidden="true" />
                   <span>Nueva reserva</span>
-                </button>
-                <button
-                  type="button"
-                  className="res-btn res-btn--ghost"
-                  onClick={handleHistorial}
-                >
-                  <i className="fa-regular fa-clock" aria-hidden="true" />
-                  <span>Historial</span>
                 </button>
                 <button
                   type="button"
@@ -673,6 +664,12 @@ function ReservasAdmin() {
               </div>
             </footer>
           </section>
+
+          <NuevaReservaModal
+            open={showNuevaReserva}
+            onOpenChange={setShowNuevaReserva}
+            onCreated={cargarReservas}
+          />
 
           {feedbackToast}
           {logoutToast}

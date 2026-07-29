@@ -31,6 +31,19 @@ class Reserva {
       // Expira las reservas vencidas antes de validar para trabajar con datos actualizados
       await this.expireReservas(conn);
 
+      const [[usuario]] = await conn.query(
+        `SELECT estado FROM usuario WHERE id_usuario = ?`,
+        [idUsuario],
+      );
+
+      if (!usuario) {
+        throw new Error("Usuario no existe");
+      }
+
+      if (usuario.estado !== "activo") {
+        throw new Error("El usuario no está activo y no puede reservar");
+      }
+
       // Verifica que el usuario no supere el límite de 3 reservas activas simultáneas
       const [[{ total }]] = await conn.query(
         `SELECT COUNT(*) as total FROM reserva WHERE id_usuario = ? AND estado = 'activa'`,

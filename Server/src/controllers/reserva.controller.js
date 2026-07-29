@@ -36,6 +36,14 @@ class ReservaController {
         return res.status(409).json({ message: msg });
       }
 
+      if (msg.includes("Usuario no existe")) {
+        return res.status(404).json({ message: msg });
+      }
+
+      if (msg.includes("no está activo")) {
+        return res.status(403).json({ message: msg });
+      }
+
       return res
         .status(500)
         .json({ message: "Error creando reserva", error: msg });
@@ -84,6 +92,55 @@ class ReservaController {
   }
 
   // ── Métodos exclusivos para administradores ───────────────────
+
+  // Crea una reserva a nombre de cualquier usuario desde el panel de administración
+  static async adminCreate(req, res) {
+    try {
+      const idUsuario = Number(req.body.id_usuario);
+      const idLibro = Number(req.body.id_libro);
+
+      if (!Number.isInteger(idUsuario) || idUsuario <= 0 || !Number.isInteger(idLibro) || idLibro <= 0) {
+        return res.status(400).json({ message: "id_usuario e id_libro son requeridos y deben ser válidos" });
+      }
+
+      const result = await Reserva.createReserva(idUsuario, idLibro);
+      return res.status(201).json(result);
+    } catch (error) {
+      const msg = error.message || "Error creando reserva";
+
+      if (msg.includes("Limite")) {
+        return res.status(409).json({ message: msg });
+      }
+
+      if (msg.includes("No hay ejemplares")) {
+        return res.status(409).json({ message: msg });
+      }
+
+      if (msg.includes("Libro no existe")) {
+        return res.status(404).json({ message: msg });
+      }
+
+      if (msg.includes("Ya tienes una reserva")) {
+        return res.status(409).json({ message: msg });
+      }
+
+      if (msg.includes("no está disponible")) {
+        return res.status(409).json({ message: msg });
+      }
+
+      if (msg.includes("Usuario no existe")) {
+        return res.status(404).json({ message: msg });
+      }
+
+      if (msg.includes("no está activo")) {
+        return res.status(403).json({ message: msg });
+      }
+
+      return res
+        .status(500)
+        .json({ message: "Error creando reserva", error: msg });
+    }
+  }
 
   // Lista todas las reservas del sistema para el panel de administración
   static async adminList(req, res) {

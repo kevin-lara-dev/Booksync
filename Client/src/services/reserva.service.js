@@ -39,3 +39,9 @@ export const cancelReservaAdmin = async (idReserva) => {
   const { data } = await api.patch(`/reservas/admin/${idReserva}/cancelar`);
   return data;
 };
+
+// Crea una reserva a nombre de cualquier usuario desde el panel de administración
+export const crearReservaAdmin = async (idUsuario, idLibro) => {
+  const { data } = await api.post("/reservas/admin", { id_usuario: idUsuario, id_libro: idLibro });
+  return data;
+};
