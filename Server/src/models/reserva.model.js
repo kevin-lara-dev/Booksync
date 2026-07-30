@@ -55,11 +55,22 @@ class Reserva {
 
       // Validar que no tenga ya una reserva activa o confirmada del mismo libro
       const [[duplicada]] = await conn.query(
-        `SELECT id_usuario, estado FROM reserva WHERE id_usuario = ? AND id_libro  = ? AND estado IN ('activa', 'confirmada', 'prestada') LIMIT 1`,
+        `SELECT id_usuario FROM reserva WHERE id_usuario = ? AND id_libro = ? AND estado IN ('activa', 'confirmada') LIMIT 1`,
         [idUsuario, idLibro],
       );
 
       if (duplicada) {
+        throw new Error(
+          "Ya tienes una reserva o préstamo activo para este libro",
+        );
+      }
+
+      const [[prestamoActivo]] = await conn.query(
+        `SELECT id_prestamo FROM prestamo WHERE id_usuario = ? AND id_libro = ? AND estado IN ('activo', 'vencido') LIMIT 1`,
+        [idUsuario, idLibro],
+      );
+
+      if (prestamoActivo) {
         throw new Error(
           "Ya tienes una reserva o préstamo activo para este libro",
         );
