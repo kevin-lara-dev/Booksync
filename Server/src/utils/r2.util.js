@@ -1,11 +1,16 @@
 const crypto = require("crypto");
-const path = require("path");
 const { PutObjectCommand } = require("@aws-sdk/client-s3");
 const r2Client = require("../config/r2");
 
+const MIME_TO_EXT = {
+  "image/jpeg": ".jpg",
+  "image/png": ".png",
+  "image/webp": ".webp",
+};
+
 // Sube la portada de un libro a R2 y devuelve la URL pública final
 async function uploadCoverToR2(file) {
-  const extension = path.extname(file.originalname);
+  const extension = MIME_TO_EXT[file.mimetype] || ".jpg";
   const key = `libros/${Date.now()}-${crypto.randomBytes(8).toString("hex")}${extension}`;
 
   await r2Client.send(

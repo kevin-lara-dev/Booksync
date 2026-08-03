@@ -189,6 +189,44 @@
   font-size: 0.75rem;
 }
 
+.inv-chip-select {
+  border: none;
+  background: transparent;
+  font-size: 0.8rem;
+  cursor: pointer;
+  outline: none;
+  color: #1a1a1a;
+  padding: 0;
+}
+
+.inv-chip--active {
+  background: #f7d470;
+  border-color: rgba(0, 0, 0, 0.6);
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.inv-chip i {
+  color: #1a1a1a;
+}
+
+.inv-chip--clear {
+  background: linear-gradient(135deg, #f7e4b6, #e2c27a);
+  border: none;
+  color: #1b160e;
+  font-weight: 700;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.inv-chip--clear:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35);
+}
+
+.inv-chip--clear:active {
+  transform: scale(0.95);
+}
+
 /* ===== TABLA DE INVENTARIO ===== */
 
 .inventory-admin-table-wrapper {
@@ -295,6 +333,48 @@
   padding: 18px 12px;
   font-style: italic;
   color: #f5e9d0;
+}
+
+/* ===== PAGINADO ===== */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.pagination-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  background: rgba(248, 237, 210, 0.95);
+  color: #1f1306;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #f3c752;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination-btn--active {
+  background: #f7d470;
+  border-color: rgba(0, 0, 0, 0.65);
+  font-weight: 700;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 /* ===== FOOTER ACCIONES MASIVAS ===== */

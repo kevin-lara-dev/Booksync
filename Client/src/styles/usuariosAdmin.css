@@ -103,18 +103,30 @@
     gap: 6px;
     padding: 6px 12px;
     border-radius: 999px;
-    border: 1px solid rgba(0, 0, 0, 0.25);
-    background: rgba(248, 237, 250, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.45);
+    background: rgba(248, 237, 210, 0.95);
     font-size: 0.78rem;
     cursor: pointer;
   }
-  
+
+  .users-chip-select {
+    border: none;
+    background: transparent;
+    font-size: 0.78rem;
+    cursor: pointer;
+    outline: none;
+    color: #1a1a1a;
+    padding: 0;
+    font-weight: 600;
+  }
+
   .users-chip .chip-value {
     font-weight: 600;
   }
   
   .users-chip i {
     font-size: 0.75rem;
+    color: #1a1a1a;
   }
   
   /* Grid de tarjetas */

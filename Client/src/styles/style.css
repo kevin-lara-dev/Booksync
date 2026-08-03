@@ -201,3 +201,20 @@ body{
     width:76px;
   }
 }
+
+/* ===== Estilo global de listas desplegadas (<option>) de todos los <select> de la app ===== */
+select {
+  color-scheme: dark;
+}
+
+select option {
+  background-color: #2a1b08;
+  color: #f7f1e7;
+  padding: 8px 12px;
+}
+
+select option:checked,
+select option:hover {
+  background-color: #f7d470;
+  color: #1a1a1a;
+}

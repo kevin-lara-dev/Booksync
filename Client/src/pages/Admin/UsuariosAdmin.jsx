@@ -17,6 +17,9 @@ function UsuariosAdmin() {
   const [roleFilter, setRoleFilter] = useState("todos");
   const [statusFilter, setStatusFilter] = useState("todos");
   const [actionLoading, setActionLoading] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const ITEMS_PER_PAGE = 12;
 
   const { toast: logoutToast, openToast } = useLogoutToast();
   const { toast: feedbackToast, showToast } = useToast();
@@ -114,6 +117,17 @@ function UsuariosAdmin() {
     return result;
   }, [users, search, roleFilter, statusFilter]);
 
+  // Vuelve a la primera página cuando cambia la búsqueda o los filtros, para no quedarse en una página sin resultados
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, roleFilter, statusFilter]);
+
+  const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
+  const paginatedUsers = filteredUsers.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  );
+
   // Genera y descarga un archivo CSV con los usuarios que están visibles según los filtros activos
   const handleExportUsers = () => {
     if (filteredUsers.length === 0) {
@@ -175,39 +189,32 @@ function UsuariosAdmin() {
 
             {/* Filtros */}
             <div className="users-admin-filters-row">
-              <button
-                type="button"
-                className="users-chip"
-                onClick={() =>
-                  setRoleFilter((prev) =>
-                    prev === "todos" ? "administrador" : "todos",
-                  )
-                }
-              >
+              <label className="users-chip">
                 <i className="fa-solid fa-filter" />
-                <span>Tipo</span>
-                <span className="chip-value">
-                  {roleFilter === "todos" ? "Todos" : roleFilter}
-                </span>
-                <i className="fa-solid fa-chevron-down" />
-              </button>
+                <select
+                  className="users-chip-select"
+                  value={roleFilter}
+                  onChange={(e) => setRoleFilter(e.target.value)}
+                >
+                  <option value="todos">Tipo: Todos</option>
+                  <option value="usuario">Usuario</option>
+                  <option value="administrador">Administrador</option>
+                  <option value="bibliotecario">Bibliotecario</option>
+                </select>
+              </label>
 
-              <button
-                type="button"
-                className="users-chip"
-                onClick={() =>
-                  setStatusFilter((prev) =>
-                    prev === "todos" ? "activo" : "todos",
-                  )
-                }
-              >
-                <i className="fa-solid fa-chevron-down" />
-                <span>Estado</span>
-                <span className="chip-value">
-                  {statusFilter === "todos" ? "Todos" : statusFilter}
-                </span>
-                <i className="fa-solid fa-chevron-down" />
-              </button>
+              <label className="users-chip">
+                <i className="fa-solid fa-toggle-on" />
+                <select
+                  className="users-chip-select"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="todos">Estado: Todos</option>
+                  <option value="activo">Activo</option>
+                  <option value="inactivo">Inactivo</option>
+                </select>
+              </label>
             </div>
 
             {/* Estados de carga y error */}
@@ -226,7 +233,7 @@ function UsuariosAdmin() {
             {/* Grid */}
             {!loading && !error && (
               <div className="users-admin-grid">
-                {filteredUsers.map((user) => {
+                {paginatedUsers.map((user) => {
                   const isActive = user.estado === "activo";
                   const isLoading = actionLoading === user.id_usuario;
                   const roleLabel =
@@ -309,6 +316,42 @@ function UsuariosAdmin() {
                     No se encontraron usuarios para esa búsqueda.
                   </div>
                 )}
+              </div>
+            )}
+
+            {totalPages > 1 && (
+              <div className="pagination" role="navigation" aria-label="Paginacion">
+                <button
+                  className="pagination-btn"
+                  type="button"
+                  onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                  disabled={currentPage === 1}
+                  aria-label="Pagina anterior"
+                >
+                  <i className="fa-solid fa-chevron-left" />
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    className={`pagination-btn ${page === currentPage ? "pagination-btn--active" : ""}`}
+                    type="button"
+                    onClick={() => setCurrentPage(page)}
+                    aria-current={page === currentPage ? "page" : undefined}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                <button
+                  className="pagination-btn"
+                  type="button"
+                  onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  aria-label="Pagina siguiente"
+                >
+                  <i className="fa-solid fa-chevron-right" />
+                </button>
               </div>
             )}
 

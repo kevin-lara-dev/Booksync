@@ -15,6 +15,7 @@ function PrestamosAdmin() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [paginaActual, setPaginaActual] = useState(1);
+  const [filtroEstado, setFiltroEstado] = useState("");
   const { toast: logoutToast, openToast } = useLogoutToast();
   const { toast: feedbackToast, showToast } = useToast();
 
@@ -39,7 +40,7 @@ function PrestamosAdmin() {
 
   useEffect(() => {
     setPaginaActual(1);
-  }, [search]);
+  }, [search, filtroEstado]);
 
   const formatDate = (dateString) => {
     if (!dateString) return "No disponible";
@@ -66,15 +67,18 @@ function PrestamosAdmin() {
   };
 
   const prestamosFiltrados = useMemo(() => {
-    if (!search.trim()) return prestamos;
-    const term = search.toLowerCase();
-    return prestamos.filter((p) =>
-      [p.title, p.author, getUsuario(p), p.correo, p.estado]
-        .join(" ")
-        .toLowerCase()
-        .includes(term),
-    );
-  }, [prestamos, search]);
+    return prestamos.filter((p) => {
+      const term = search.toLowerCase();
+      const matchSearch =
+        !search.trim() ||
+        [p.title, p.author, getUsuario(p), p.correo, p.estado]
+          .join(" ")
+          .toLowerCase()
+          .includes(term);
+      const matchEstado = !filtroEstado || p.estado === filtroEstado;
+      return matchSearch && matchEstado;
+    });
+  }, [prestamos, search, filtroEstado]);
 
   const totalPaginas = Math.ceil(prestamosFiltrados.length / ITEMS_POR_PAGINA);
 
@@ -154,6 +158,33 @@ function PrestamosAdmin() {
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
+            </div>
+
+            <div className="reservas-admin-filters-row">
+              <label className={`res-chip ${filtroEstado ? "res-chip--active" : ""}`}>
+                <i className="fa-solid fa-toggle-on" />
+                <select
+                  className="res-chip-select"
+                  value={filtroEstado}
+                  onChange={(e) => setFiltroEstado(e.target.value)}
+                >
+                  <option value="">Estado</option>
+                  <option value="activo">Activo</option>
+                  <option value="vencido">Vencido</option>
+                  <option value="devuelto">Devuelto</option>
+                </select>
+              </label>
+
+              {filtroEstado && (
+                <button
+                  type="button"
+                  className="res-chip res-chip--clear"
+                  onClick={() => setFiltroEstado("")}
+                >
+                  <i className="fa-solid fa-xmark" />
+                  <span>Limpiar</span>
+                </button>
+              )}
             </div>
 
             <div className="reservas-admin-table-wrapper">

@@ -235,3 +235,108 @@ input[type="password"] {
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35) !important;
   border: 1px solid rgba(189, 142, 57, 0.4) !important;
 }
+
+.manuals-toggle-wrap {
+  position: absolute;
+  top: -16px;
+  right: -16px;
+  z-index: 6;
+}
+
+.manuals-toggle-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  background: #f7d470;
+  color: #1f1306;
+  font-size: 1.05rem;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+  transition: transform 0.1s ease;
+}
+
+.manuals-toggle-btn:hover {
+  transform: translateY(-2px);
+}
+
+.manuals-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: min(360px, 85vw);
+  background: rgba(36, 20, 4, 0.95);
+  border: 1px solid rgba(255, 215, 120, 0.3);
+  border-radius: 16px;
+  padding: 16px 18px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+  z-index: 20;
+}
+
+.manuals-panel::after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  right: 14px;
+  border-width: 0 8px 8px;
+  border-style: solid;
+  border-color: transparent transparent rgba(36, 20, 4, 0.95) transparent;
+}
+
+.manuals-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #f7f1e7;
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 10px;
+}
+
+.manuals-panel-close {
+  border: none;
+  background: transparent;
+  color: #f0e6d0;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.manuals-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.manuals-list a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(248, 237, 210, 0.08);
+  color: #f0e6d0;
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.manuals-list a:hover {
+  background: rgba(247, 212, 112, 0.18);
+  color: #f7d470;
+}
+
+.manuals-credentials {
+  margin: 12px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 0.78rem;
+  color: #d8c9a8;
+  text-align: center;
+}
+
+.manuals-credentials strong {
+  color: #f7d470;
+}

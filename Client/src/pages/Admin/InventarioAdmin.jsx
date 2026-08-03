@@ -30,6 +30,12 @@ function InventarioAdmin (){
     const [showForm, setShowForm] = useState(false);
     const [editingBook, setEditingBook] = useState(null);
 
+    const [filtroGenero, setFiltroGenero] = useState("");
+    const [filtroEstado, setFiltroEstado] = useState("");
+    const [filtroUbicacion, setFiltroUbicacion] = useState("");
+    const [filtroStock, setFiltroStock] = useState("");
+    const [filtroAnio, setFiltroAnio] = useState("");
+
     const [formData, setFormData] = useState({
         isbn: "",
         title: "",
@@ -69,27 +75,57 @@ function InventarioAdmin (){
     }, []);
 
 
-    // Filtra los libros en memoria según el texto del buscador. useMemo evita recalcular en cada render.
-    const filteredBooks = useMemo(() => {
-        if(!search.trim()) return books;
-        
-        const term =  search.toLowerCase();
-        return books.filter((book) => 
-            [
-                book.isbn,
-                book.title,
-                book.author,
-                book.genre,
-                book.location,
-                book.publication_year,
-                book.available_quantity,
+    // Categorías, ubicaciones y años únicos presentes en el inventario, para poblar los selects de filtro
+    const categoriasDisponibles = useMemo(() => {
+        const set = new Set(books.map((b) => b.genre).filter(Boolean));
+        return Array.from(set).sort();
+    }, [books]);
 
-            ]
-            .join(" ")
-            .toLowerCase()
-            .includes(term)
-        );
-    }, [books, search]);
+    const ubicacionesDisponibles = useMemo(() => {
+        const set = new Set(books.map((b) => b.location).filter(Boolean));
+        return Array.from(set).sort();
+    }, [books]);
+
+    const aniosDisponibles = useMemo(() => {
+        const set = new Set(books.map((b) => b.publication_year).filter(Boolean));
+        return Array.from(set).sort((a, b) => b - a);
+    }, [books]);
+
+
+    // Filtra los libros en memoria según el texto del buscador y los chips de filtro. useMemo evita recalcular en cada render.
+    const filteredBooks = useMemo(() => {
+        return books.filter((book) => {
+            const matchSearch =
+                !search.trim() ||
+                [
+                    book.isbn,
+                    book.title,
+                    book.author,
+                    book.genre,
+                    book.location,
+                    book.publication_year,
+                    book.available_quantity,
+                ]
+                .join(" ")
+                .toLowerCase()
+                .includes(search.toLowerCase());
+
+            const matchGenero = !filtroGenero || book.genre === filtroGenero;
+            const matchEstado = !filtroEstado || book.status === filtroEstado;
+            const matchUbicacion = !filtroUbicacion || book.location === filtroUbicacion;
+            const matchAnio = !filtroAnio || String(book.publication_year) === filtroAnio;
+
+            const matchStock = (() => {
+                if (!filtroStock) return true;
+                if (filtroStock === "con_stock") return book.available_quantity > 2;
+                if (filtroStock === "bajo") return book.available_quantity >= 1 && book.available_quantity <= 2;
+                if (filtroStock === "agotado") return book.available_quantity === 0;
+                return true;
+            })();
+
+            return matchSearch && matchGenero && matchEstado && matchUbicacion && matchAnio && matchStock;
+        });
+    }, [books, search, filtroGenero, filtroEstado, filtroUbicacion, filtroStock, filtroAnio]);
 
 
 
@@ -381,35 +417,92 @@ function InventarioAdmin (){
                         </div>
                         
                         <div className="inventory-admin-filters-row">
-                            <button type="button" className="inv-chip">
+                            <label className={`inv-chip ${filtroGenero ? "inv-chip--active" : ""}`}>
                                 <i className="fa-solid fa-layer-group" />
-                                <span>Categoria</span>
-                                <i className="fa-solid fa-chevron-down" />
-                            </button>
+                                <select
+                                    className="inv-chip-select"
+                                    value={filtroGenero}
+                                    onChange={(e) => setFiltroGenero(e.target.value)}
+                                >
+                                    <option value="">Categoria</option>
+                                    {categoriasDisponibles.map((g) => (
+                                        <option key={g} value={g}>{g}</option>
+                                    ))}
+                                </select>
+                            </label>
 
-                            <button type="button" className="inv-chip">
+                            <label className={`inv-chip ${filtroEstado ? "inv-chip--active" : ""}`}>
                                 <i className="fa-solid fa-toggle-on" />
-                                <span>Estado</span>
-                                <i className="fa-solid fa-chevron-down" />
-                            </button>
+                                <select
+                                    className="inv-chip-select"
+                                    value={filtroEstado}
+                                    onChange={(e) => setFiltroEstado(e.target.value)}
+                                >
+                                    <option value="">Estado</option>
+                                    <option value="disponible">Disponible</option>
+                                    <option value="prestado">Prestado</option>
+                                    <option value="dañado">Dañado</option>
+                                </select>
+                            </label>
 
-                            <button type="button" className="inv-chip">
+                            <label className={`inv-chip ${filtroUbicacion ? "inv-chip--active" : ""}`}>
                                 <i className="fa-solid fa-location-dot" />
-                                <span>Ubicación</span>
-                                <i className="fa-solid fa-chevron-down" />
-                            </button>
+                                <select
+                                    className="inv-chip-select"
+                                    value={filtroUbicacion}
+                                    onChange={(e) => setFiltroUbicacion(e.target.value)}
+                                >
+                                    <option value="">Ubicación</option>
+                                    {ubicacionesDisponibles.map((u) => (
+                                        <option key={u} value={u}>{u}</option>
+                                    ))}
+                                </select>
+                            </label>
 
-                            <button type="button" className="inv-chip">
+                            <label className={`inv-chip ${filtroStock ? "inv-chip--active" : ""}`}>
                                 <i className="fa-solid fa-boxes-stacked" />
-                                <span>Stock</span>
-                                <i className="fa-solid fa-chevron-down" />
-                            </button>
+                                <select
+                                    className="inv-chip-select"
+                                    value={filtroStock}
+                                    onChange={(e) => setFiltroStock(e.target.value)}
+                                >
+                                    <option value="">Stock</option>
+                                    <option value="con_stock">Con stock</option>
+                                    <option value="bajo">Stock bajo</option>
+                                    <option value="agotado">Agotado</option>
+                                </select>
+                            </label>
 
-                            <button type="button" className="inv-chip">
+                            <label className={`inv-chip ${filtroAnio ? "inv-chip--active" : ""}`}>
                                 <i className="fa-solid fa-calendar" />
-                                <span>Año</span>
-                                <i className="fa-solid fa-chevron-down" />
-                            </button>
+                                <select
+                                    className="inv-chip-select"
+                                    value={filtroAnio}
+                                    onChange={(e) => setFiltroAnio(e.target.value)}
+                                >
+                                    <option value="">Año</option>
+                                    {aniosDisponibles.map((a) => (
+                                        <option key={a} value={a}>{a}</option>
+                                    ))}
+                                </select>
+                            </label>
+
+                            {(filtroGenero || filtroEstado || filtroUbicacion || filtroStock || filtroAnio) && (
+                                <button
+                                    type="button"
+                                    className="inv-chip inv-chip--clear"
+                                    onClick={() => {
+                                        setFiltroGenero("");
+                                        setFiltroEstado("");
+                                        setFiltroUbicacion("");
+                                        setFiltroStock("");
+                                        setFiltroAnio("");
+                                    }}
+                                >
+                                    <i className="fa-solid fa-xmark" />
+                                    <span>Limpiar</span>
+                                </button>
+                            )}
                         </div>
 
                         {/* ===== TABLE ===== */}

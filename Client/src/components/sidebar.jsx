@@ -1,9 +1,12 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
+import AboutModal from "./AboutModal";
 
 function Sidebar({ onLogout }) {
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
+  const [showAbout, setShowAbout] = useState(false);
 
   const handleLogout = () => {
     if (onLogout) {
@@ -82,6 +85,16 @@ function Sidebar({ onLogout }) {
       )}
 
       <div className="side-tools">
+        <button
+          type="button"
+          className="tool"
+          title="Acerca de"
+          onClick={() => setShowAbout(true)}
+        >
+          <i className="fa-solid fa-circle-info" />
+          <small>Info</small>
+        </button>
+
         <Link className="tool" title="Cuenta" to="/Cuenta">
           <i className="fa-regular fa-user" />
           <small>Cuenta</small>
@@ -100,6 +113,8 @@ function Sidebar({ onLogout }) {
           <small>Salir</small>
         </button>
       </div>
+
+      <AboutModal open={showAbout} onOpenChange={setShowAbout} />
     </aside>
   );
 }
