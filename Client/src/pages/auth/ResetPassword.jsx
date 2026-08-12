@@ -60,7 +60,7 @@ function Reset() {
     <main className="login-wrap reset-page">
       <div className="login-inner">
         <div className="login-brand">
-          <img src="BOOKSYNC LOGO 2.png" alt="BOOKSYNC" />
+          <img src="/BOOKSYNC LOGO 2.png" alt="BOOKSYNC" />
         </div>
 
         <section className="login-card reset-card">

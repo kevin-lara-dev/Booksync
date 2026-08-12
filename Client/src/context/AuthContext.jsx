@@ -46,6 +46,10 @@ export function AuthProvider({ children }) {
       logout,
       isAuthenticated: !!token, // true si hay token
       isAdmin: currentUser?.role === "administrador", // true si el rol es admin
+      // true si es admin o bibliotecario , acceso a la operación diaria (reservas y préstamos)
+      isStaff:
+        currentUser?.role === "administrador" ||
+        currentUser?.role === "bibliotecario",
     };
   }, [currentUser, token]);
 

@@ -5,7 +5,7 @@ import AboutModal from "./AboutModal";
 
 function Sidebar({ onLogout }) {
   const navigate = useNavigate();
-  const { isAdmin } = useAuth();
+  const { isAdmin, isStaff } = useAuth();
   const [showAbout, setShowAbout] = useState(false);
 
   const handleLogout = () => {
@@ -40,20 +40,23 @@ function Sidebar({ onLogout }) {
         </Link>
       </nav>
 
-      {/* Sección de navegación exclusiva para administradores */}
-      {isAdmin && (
+      {/* Sección de navegación de operación diaria — administrador y bibliotecario */}
+      {isStaff && (
         <nav
           className="side-actions side-actions--admin"
           aria-label="Secciones de administración"
         >
-          <Link
-            className="side-btn"
-            title="Gestión de inventario"
-            to="/Admin/Inventario"
-          >
-            <i className="fa-solid fa-boxes-stacked" />
-            <small></small>
-          </Link>
+          {/* Inventario y Usuarios son gestión, no operación diaria: solo administrador */}
+          {isAdmin && (
+            <Link
+              className="side-btn"
+              title="Gestión de inventario"
+              to="/Admin/Inventario"
+            >
+              <i className="fa-solid fa-boxes-stacked" />
+              <small></small>
+            </Link>
+          )}
 
           <Link
             className="side-btn"
@@ -73,14 +76,16 @@ function Sidebar({ onLogout }) {
             <small></small>
           </Link>
 
-          <Link
-            className="side-btn"
-            title="Gestión de usuarios"
-            to="/Admin/Usuarios"
-          >
-            <i className="fa-solid fa-users-gear" />
-            <small></small>
-          </Link>
+          {isAdmin && (
+            <Link
+              className="side-btn"
+              title="Gestión de usuarios"
+              to="/Admin/Usuarios"
+            >
+              <i className="fa-solid fa-users-gear" />
+              <small></small>
+            </Link>
+          )}
         </nav>
       )}
 

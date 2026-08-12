@@ -276,7 +276,11 @@
     font-style: italic;
     color: #f5e9d0;
   }
-  
+
+  .users-admin-empty--error {
+    color: #e07a6b;
+  }
+
   /* Responsivo */
   @media (max-width: 768px) {
     .users-admin-panel {

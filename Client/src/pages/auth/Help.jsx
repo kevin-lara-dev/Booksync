@@ -35,7 +35,7 @@ const Help = () => {
       {/* Logo */}
       <div className="login-inner">
         <div className="login-brand">
-          <img src="BOOKSYNC LOGO 2.png" alt="Logo BOOKSYNC" />
+          <img src="/BOOKSYNC LOGO 2.png" alt="Logo BOOKSYNC" />
         </div>
 
         <section

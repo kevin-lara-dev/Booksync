@@ -42,7 +42,7 @@ function Login() {
     <main className="login-wrap ">
       <div className="login-inner">
         <div className="login-brand">
-          <img src="BOOKSYNC LOGO 2.png" alt="Logo BOOKSYNC" />
+          <img src="/BOOKSYNC LOGO 2.png" alt="Logo BOOKSYNC" />
         </div>
 
         <section

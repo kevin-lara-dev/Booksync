@@ -116,7 +116,7 @@ function Register() {
       <div className="login-inner">
         {/* Logo */}
         <div className="login-brand">
-          <img src="BOOKSYNC LOGO 2.png" alt="BOOKSYNC" />
+          <img src="/BOOKSYNC LOGO 2.png" alt="BOOKSYNC" />
         </div>
 
         {/* Tarjeta registro */}

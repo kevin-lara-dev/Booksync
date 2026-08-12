@@ -109,6 +109,37 @@ class Libro {
         return rows[0];
         }
 
+    // Devuelve los libros activos ordenados por cantidad de préstamos históricos (los "más recomendados").
+    // Usa LEFT JOIN para que los libros sin ningún préstamo también aparezcan (con conteo 0),
+    // y como desempate entre libros con el mismo conteo, prioriza los más recientes.
+    static async findMostBorrowed(limit = 8){
+        const sql = `
+        SELECT
+            l.id_libro,
+            l.title,
+            l.author,
+            l.genre,
+            l.publication_year,
+            l.available_quantity,
+            l.location,
+            l.isbn,
+            l.status,
+            l.cover,
+            l.editorial,
+            l.description,
+            COUNT(p.id_prestamo) AS veces_prestado
+        FROM libro l
+        LEFT JOIN prestamo p ON p.id_libro = l.id_libro
+        WHERE l.status != 'inactivo'
+        GROUP BY l.id_libro
+        ORDER BY veces_prestado DESC, l.id_libro DESC
+        LIMIT ?
+        `;
+
+        const [rows] = await pool.query(sql, [limit]);
+        return rows;
+    }
+
     // Obtiene todos los géneros distintos que existen en el catálogo
     static async getGenres (){
         const sql = `SELECT DISTINCT genre FROM libro WHERE status != "inactivo" ORDER BY genre ASC`

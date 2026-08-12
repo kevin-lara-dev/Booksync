@@ -81,6 +81,13 @@
 }
 
 /* ---------- Cards y carrusel ---------- */
+.home-page .home-recommended-loading{
+  color:#f5f3e8;
+  font-size:0.95rem;
+  text-align:center;
+  margin-top:50px;
+}
+
 .home-page .featured{
   display:flex;
   flex-direction:column;

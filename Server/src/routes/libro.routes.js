@@ -1,7 +1,7 @@
 const express = require("express");
 const LibroController = require("../controllers/libro.controller");
 const verifyToken = require("../middlewares/auth.middleware");
-const isAdmin = require("../middlewares/role.middleware");
+const { isAdmin } = require("../middlewares/role.middleware");
 const upload = require("../middlewares/upload.middleware");
 
 const router = express.Router();
@@ -20,6 +20,9 @@ router.get("/", verifyToken, LibroController.getAllLibros);
 
 // géneros distintos — OJO: tiene que ir antes de /:id sino express lo toma como un id
 router.get("/genres", verifyToken, LibroController.getGenres);
+
+// libros más recomendados (más prestados) para el carrusel del Home — también antes de /:id
+router.get("/recomendados", verifyToken, LibroController.getRecommended);
 
 // detalle de un libro por id — usuarios y admin
 router.get("/:id", verifyToken, LibroController.getLibroById);

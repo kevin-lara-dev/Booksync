@@ -506,31 +506,34 @@ function InventarioAdmin (){
                         </div>
 
                         {/* ===== TABLE ===== */}
-                        {loading ? (
-                            <p style={{ padding: "1rem" }}>
-                                Cargando inventario...
-                            </p>
-                        ) : (
-                            <div className="inventory-admin-table-wrapper">
-                                <table className="inventory-admin-table">
-                                    <thead>
-                                        <tr>
-                                            <th className="col-checkbox">
-                                                <input type="checkbox" aria-label="Seleccionar todos" ref={selectAllRef} checked={allVisibleSelected} onChange={handleToggleAll} />
-                                            </th>
-                                            <th>Portada</th>
-                                            <th>Código / ISBN</th>
-                                            <th>Título</th>
-                                            <th>Autor</th>
-                                            <th>Categoría</th>
-                                            <th>Ubicación</th>
-                                            <th className="col-stock">Stock</th>
-                                            <th className="col-actions">Acciones</th>
-                                        </tr>
-                                    </thead>
+                        <div className="inventory-admin-table-wrapper">
+                            <table className="inventory-admin-table">
+                                <thead>
+                                    <tr>
+                                        <th className="col-checkbox">
+                                            <input type="checkbox" aria-label="Seleccionar todos" ref={selectAllRef} checked={allVisibleSelected} onChange={handleToggleAll} />
+                                        </th>
+                                        <th>Portada</th>
+                                        <th>Código / ISBN</th>
+                                        <th>Título</th>
+                                        <th>Autor</th>
+                                        <th>Categoría</th>
+                                        <th>Ubicación</th>
+                                        <th className="col-stock">Stock</th>
+                                        <th className="col-actions">Acciones</th>
+                                    </tr>
+                                </thead>
 
-                                    <tbody>
-                                        {paginatedBooks.map((book) => (
+                                <tbody>
+                                    {loading && (
+                                        <tr>
+                                            <td colSpan={9} className="no-results">
+                                                Cargando inventario...
+                                            </td>
+                                        </tr>
+                                    )}
+
+                                    {!loading && paginatedBooks.map((book) => (
                                             <tr key={book.id_libro}>
                                                 <td className="col-checkbox">
                                                     <input type="checkbox" aria-label={`Seleccionar ${book.title}`} checked={selectedIds.includes(book.id_libro)} onChange={() => handleToggleRow(book.id_libro)}/>
@@ -576,7 +579,7 @@ function InventarioAdmin (){
 
                                         {!loading && filteredBooks.length === 0 && (
                                             <tr>
-                                                <td colSpan = {8} className="no-results">
+                                                <td colSpan={9} className="no-results">
                                                     No hay libros registrados en el sistema.
                                                 </td>
                                             </tr>
@@ -584,7 +587,6 @@ function InventarioAdmin (){
                                     </tbody>
                                 </table>
                             </div>
-                        )}
 
                         {/* FORMULARIO */}
                         <BookFormModal

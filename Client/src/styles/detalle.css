@@ -22,6 +22,14 @@
   padding: 2rem;
 }
 
+/* Mensaje de carga mientras se obtiene el libro */
+.detalle-page .detalle-loading {
+  align-self: center;
+  color: #f1e9d6;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
 /* glass */
 .detalle-page .detalle-card {
   width: min(1100px, 95%);

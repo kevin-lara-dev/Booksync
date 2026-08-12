@@ -38,7 +38,7 @@ function Detalle() {
 
         const favRes = await isFavorite(id);
         setIsFav(Boolean(favRes.isFav));
-      } catch (error) {
+      } catch {
         navigate("/Home");
       } finally {
         setLoading(false);
@@ -52,8 +52,8 @@ function Detalle() {
     return (
       <div className="detalle-page">
         <Sidebar onLogout={openToast} />
-        <main className="content">
-          <p>Cargando libro...</p>
+        <main className="content detalle-content">
+          <p className="detalle-loading">Cargando libro...</p>
         </main>
       </div>
     );
@@ -130,7 +130,7 @@ function Detalle() {
           text: `${book.title} — ${book.author}`,
           url,
         });
-      } catch (err) {
+      } catch {
         // El usuario canceló el diálogo nativo de compartir, no se hace nada
       }
       return;
@@ -140,7 +140,7 @@ function Detalle() {
     try {
       await navigator.clipboard.writeText(url);
       showToast("Enlace copiado", "El link del libro se copió al portapapeles");
-    } catch (err) {
+    } catch {
       showToast("Error", "No se pudo copiar el enlace");
     }
   };

@@ -1,8 +1,8 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/sidebar";
 import { useLogoutToast } from "../../hooks/useLogoutToast";
-import { getLibrosRequest, getGenres } from "../../services/libro.service";
+import { getLibrosRequest, getGenres, getRecommendedBooks } from "../../services/libro.service";
 import { getCoverUrl } from "../../utils/coverUrl";
 
 function Home() {
@@ -17,6 +17,7 @@ function Home() {
   const [sortField, setSortField] = useState("title");
   const [sortOrder, setSortOrder] = useState("ASC");
   const [genres, setGenres] = useState([]);
+  const [recommendedLoading, setRecommendedLoading] = useState(true);
 
   // Estado del carrusel de destacados
   const [currentIndex, setCurrentIndex] = useState(0); 
@@ -26,7 +27,9 @@ function Home() {
   const { toast, openToast } = useLogoutToast();
 
   // Obtiene libros desde la API según los filtros actuales (búsqueda, género, orden)
-  const fetchLibros = async (search = "") => {
+  // Memorizada con useCallback: solo cambia de identidad cuando cambian sus propios filtros,
+  // así el useEffect de abajo puede depender de ella sin re-ejecutarse en cada render.
+  const fetchLibros = useCallback(async (search = "") => {
     try {
       const data = await getLibrosRequest({
         title: search,
@@ -35,9 +38,11 @@ function Home() {
         order: sortOrder,
       });
       setLibros(data.libros || []);
-    } catch (error) {}
-  }
-  
+    } catch {
+      // Si falla la búsqueda, simplemente no se actualizan los resultados
+    }
+  }, [selectedGenre, sortField, sortOrder]);
+
   // Espera 400ms después de que el usuario deja de escribir antes de buscar (debounce), para no lanzar una petición por cada tecla
   useEffect(() => {
     const delay = setTimeout(() => {
@@ -52,19 +57,22 @@ function Home() {
     }, 400)
 
     return () => clearTimeout(delay);
-  }, [query, selectedGenre, sortField, sortOrder]);
+  }, [query, fetchLibros]);
 
-  // Obtiene los 8 libros más recientes del catálogo para mostrarlos en el carrusel de destacados
+  // Obtiene los 8 libros más recomendados (más prestados históricamente) para el carrusel de destacados
   useEffect(() => {
-    const fetchRecentBooks = async () => {
+    const fetchRecommendedBooks = async () => {
       try {
-        const data = await getLibrosRequest();
-        const sorted = (data.libros || []).sort((a, b) => b.id_libro - a.id_libro).slice(0, 8);
-        setRecentBooks(sorted);
+        const data = await getRecommendedBooks(8);
+        setRecentBooks(data.libros || []);
         setCurrentIndex(0);
-      } catch (error) {}
+      } catch {
+        // Si falla, el carrusel simplemente no muestra libros recomendados
+      } finally {
+        setRecommendedLoading(false);
+      }
     }
-    fetchRecentBooks();
+    fetchRecommendedBooks();
   }, []);
 
 
@@ -103,7 +111,9 @@ function Home() {
       try {
         const data = await getGenres();
         setGenres(data.genres || []);
-      } catch (error) {}
+      } catch {
+        // Si falla, el selector de categorías simplemente queda vacío
+      }
     }
     fetchGenres();
   }, [])
@@ -157,7 +167,11 @@ function Home() {
         </div>
 
         {/* ===== Destacados (carrusel) ===== */}
-        {!showResults && recentBooks.length > 0 && (
+        {!showResults && recommendedLoading && (
+          <p className="home-recommended-loading">Cargando recomendados...</p>
+        )}
+
+        {!showResults && !recommendedLoading && recentBooks.length > 0 && (
           <section
             id="spotlight"
             className="featured"

@@ -18,6 +18,7 @@ import UsuariosAdmin from "./pages/Admin/UsuariosAdmin.jsx";
 import PrestamosAdmin from "./pages/Admin/PrestamosAdmin.jsx";
 
 import { AdminRoute } from "./components/AdminRoute.jsx";
+import { StaffRoute } from "./components/StaffRoute.jsx";
 import { PrivateRoute } from "./components/PrivateRoute.jsx";
 
 function App() {
@@ -92,10 +93,10 @@ function App() {
       <Route
         path="/Admin/Reservas"
         element={
-          <AdminRoute>
+          <StaffRoute>
             {" "}
             <ReservasAdmin />{" "}
-          </AdminRoute>
+          </StaffRoute>
         }
       />
       <Route
@@ -111,10 +112,10 @@ function App() {
       <Route
         path="/Admin/Prestamos"
         element={
-          <AdminRoute>
+          <StaffRoute>
             {" "}
             <PrestamosAdmin />{" "}
-          </AdminRoute>
+          </StaffRoute>
         }
       />
 

@@ -127,7 +127,18 @@ function Account() {
 
   const avatarInitial = perfil?.nombre?.trim()?.charAt(0)?.toUpperCase() || "U";
 
-  if (loading) return <p style={{ padding: "2rem" }}>Cargando perfil...</p>;
+  if (loading) {
+    return (
+      <div className="account-page">
+        <div className="account-layout">
+          <Sidebar onLogout={openToast} />
+          <div className="account-main">
+            <p className="account-loading">Cargando perfil...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="account-page">

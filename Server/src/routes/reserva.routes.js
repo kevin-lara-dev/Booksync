@@ -1,25 +1,25 @@
 const express = require("express");
 const ReservaController = require("../controllers/reserva.controller");
 const verifyToken = require("../middlewares/auth.middleware");
-const isAdmin = require("../middlewares/role.middleware");
+const { isStaff } = require("../middlewares/role.middleware");
 
 const router = express.Router();
 
 // ============================
-// ADMIN
+// ADMIN / BIBLIOTECARIO (operación diaria de reservas)
 // ============================
 
 // ver todas las reservas del sistema
-router.get("/admin", verifyToken, isAdmin, ReservaController.adminList);
+router.get("/admin", verifyToken, isStaff, ReservaController.adminList);
 
 // crear una reserva a nombre de cualquier usuario
-router.post("/admin", verifyToken, isAdmin, ReservaController.adminCreate);
+router.post("/admin", verifyToken, isStaff, ReservaController.adminCreate);
 
 // confirmar una reserva
-router.patch("/admin/:idReserva/confirmar", verifyToken, isAdmin, ReservaController.adminConfirm);
+router.patch("/admin/:idReserva/confirmar", verifyToken, isStaff, ReservaController.adminConfirm);
 
 // cancelar una reserva desde el panel
-router.patch("/admin/:idReserva/cancelar", verifyToken, isAdmin, ReservaController.adminCancel);
+router.patch("/admin/:idReserva/cancelar", verifyToken, isStaff, ReservaController.adminCancel);
 
 // ============================
 // usuario

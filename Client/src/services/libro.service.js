@@ -19,6 +19,12 @@ export const getGenres = async () => {
   return response.data;
 };
 
+// Devuelve los libros más recomendados (más prestados históricamente). Lo usa Home.jsx para el carrusel.
+export const getRecommendedBooks = async (limit = 8) => {
+  const response = await api.get("/libros/recomendados", { params: { limit } });
+  return response.data;
+};
+
 // Sube la portada de un libro a Cloudflare R2 y devuelve { url } con la URL pública resultante
 export const uploadCover = async (file) => {
   const formData = new FormData();

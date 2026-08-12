@@ -88,6 +88,19 @@ class LibroController {
   }
 
 
+  // Devuelve los libros más recomendados (más prestados históricamente) para el carrusel del Home
+  static async getRecommended(req, res) {
+    try {
+      const limit = Number(req.query.limit) || 8;
+      const libros = await Libro.findMostBorrowed(limit);
+      return res.json({ total: libros.length, libros });
+
+    } catch (error) {
+      return res.status(500).json({ message: "Error al obtener los libros recomendados" });
+    }
+  }
+
+
   // Devuelve los géneros distintos que existen en el catálogo
   static async getGenres(req, res) {
     try {

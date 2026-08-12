@@ -21,7 +21,7 @@ function ForgotPassword() {
       // Navega a la pantalla de confirmación pasando el correo para mostrárselo al usuario
       navigate("/forgot", { state: { email: correo } });
 
-    } catch (error) {
+    } catch {
       showToast("Error", "No se pudo procesar la solicitud");
     } finally {
       setLoading(false);
@@ -32,7 +32,7 @@ function ForgotPassword() {
     <main className="login-wrap">
       <div className="login-inner">
         <div className="login-brand">
-          <img src="BOOKSYNC LOGO 2.png" alt="Logo BOOKSYNC" />
+          <img src="/BOOKSYNC LOGO 2.png" alt="Logo BOOKSYNC" />
         </div>
 
         <section className="login-card" role="dialog" aria-labelledby="forgot-title" aria-modal="true">

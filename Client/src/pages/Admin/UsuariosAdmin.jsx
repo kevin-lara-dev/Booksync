@@ -219,15 +219,11 @@ function UsuariosAdmin() {
 
             {/* Estados de carga y error */}
             {loading && (
-              <p style={{ padding: "2rem", textAlign: "center" }}>
-                Cargando usuarios...
-              </p>
+              <p className="users-admin-empty">Cargando usuarios...</p>
             )}
 
             {error && (
-              <p style={{ padding: "2rem", textAlign: "center", color: "red" }}>
-                {error}
-              </p>
+              <p className="users-admin-empty users-admin-empty--error">{error}</p>
             )}
 
             {/* Grid */}
