@@ -64,7 +64,8 @@ function InventarioAdmin (){
         try {
             const data = await getLibrosRequest();
             setbooks(data.libros || []);
-        } catch (error) {
+        } catch {
+            // Si falla, la tabla simplemente queda vacía
         } finally {
             setLoading(false)
         }
@@ -210,7 +211,7 @@ function InventarioAdmin (){
         try {
             await deleteLibro(book.id_libro);
             fetchLibros();
-        } catch (error) {
+        } catch {
             showToast("Error", "Error al eliminar el libro")
         }
     }
@@ -303,7 +304,7 @@ function InventarioAdmin (){
             }
 
             fetchLibros();
-        } catch (error) {
+        } catch {
             showToast("Error", "No se pudo procesar el archivo CSV");
         } finally {
             // Limpia el input para que el usuario pueda volver a seleccionar el mismo archivo si es necesario
@@ -312,8 +313,111 @@ function InventarioAdmin (){
     };
 
 
-    const handleBulkAction = (action) => {
-        showToast("Próximamente", "Las acciones masivas estarán disponibles pronto");
+    // Ajusta stock o elimina en lote los libros marcados con el checkbox.
+    // Reutiliza los mismos endpoints de update/delete que usan las acciones por fila, aplicados uno por uno.
+    const handleBulkAction = async (action) => {
+        if (selectedIds.length === 0) {
+            showToast("Error", "Selecciona al menos un libro");
+            return;
+        }
+
+        if (action === "Ajustar stock") {
+            const { value: ajuste } = await Swal.fire({
+                title: "Ajustar stock",
+                html: `
+                    <select id="swal-stock-modo" class="swal2-select">
+                        <option value="sumar">Sumar</option>
+                        <option value="restar">Restar</option>
+                        <option value="establecer">Establecer en</option>
+                    </select>
+                    <input id="swal-stock-cantidad" type="number" min="0" class="swal2-input" placeholder="Cantidad" />
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: "Aplicar",
+                cancelButtonText: "Cancelar",
+                background: "#fef6e1",
+                color: "#2b1b0b",
+                confirmButtonColor: "#d4a94d",
+                cancelButtonColor: "#9e8c78",
+                customClass: { popup: "swal-confirm-booksync" },
+                preConfirm: () => {
+                    const modo = document.getElementById("swal-stock-modo").value;
+                    const cantidad = Number(document.getElementById("swal-stock-cantidad").value);
+                    if (!Number.isFinite(cantidad) || cantidad < 0) {
+                        Swal.showValidationMessage("Ingresa una cantidad válida");
+                        return false;
+                    }
+                    return { modo, cantidad };
+                },
+            });
+
+            if (!ajuste) return;
+
+            let actualizados = 0;
+            let fallidos = 0;
+
+            for (const id of selectedIds) {
+                const libro = books.find((b) => b.id_libro === id);
+                if (!libro) continue;
+
+                let nuevoStock = libro.available_quantity;
+                if (ajuste.modo === "sumar") nuevoStock += ajuste.cantidad;
+                else if (ajuste.modo === "restar") nuevoStock = Math.max(0, nuevoStock - ajuste.cantidad);
+                else nuevoStock = ajuste.cantidad;
+
+                try {
+                    await updateLibro(id, { available_quantity: nuevoStock });
+                    actualizados++;
+                } catch {
+                    fallidos++;
+                }
+            }
+
+            showToast(
+                fallidos === 0 ? "Listo" : "Aplicado parcialmente",
+                `${actualizados} libro(s) actualizado(s)${fallidos > 0 ? `, ${fallidos} con error` : ""}`
+            );
+            setSelectedIds([]);
+            fetchLibros();
+        }
+
+        if (action === "Eliminar seleccionados") {
+            const { isConfirmed } = await Swal.fire({
+                title: "¿Eliminar libros seleccionados?",
+                text: `${selectedIds.length} libro(s) serán eliminados del inventario.`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Sí, eliminar",
+                cancelButtonText: "Cancelar",
+                background: "#fef6e1",
+                color: "#2b1b0b",
+                confirmButtonColor: "#b31313",
+                cancelButtonColor: "#9e8c78",
+                customClass: { popup: "swal-confirm-booksync" },
+            });
+
+            if (!isConfirmed) return;
+
+            let eliminados = 0;
+            let fallidos = 0;
+
+            for (const id of selectedIds) {
+                try {
+                    await deleteLibro(id);
+                    eliminados++;
+                } catch {
+                    fallidos++;
+                }
+            }
+
+            showToast(
+                fallidos === 0 ? "Listo" : "Eliminado parcialmente",
+                `${eliminados} libro(s) eliminado(s)${fallidos > 0 ? `, ${fallidos} con error` : ""}`
+            );
+            setSelectedIds([]);
+            fetchLibros();
+        }
     };
 
 
@@ -330,7 +434,8 @@ function InventarioAdmin (){
         currentPage * ITEMS_PER_PAGE,
     );
 
-    const visibleIds = filteredBooks.map((b) => b.id_libro);
+    // Solo la página actual del paginado, no todos los resultados filtrados
+    const visibleIds = paginatedBooks.map((b) => b.id_libro);
     const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.includes(id));
     const noneVisibleSelected = visibleIds.every((id) => !selectedIds.includes(id));
     const isIndeterminate = !noneVisibleSelected && !allVisibleSelected;
@@ -410,9 +515,6 @@ function InventarioAdmin (){
                                     <i className="fa-solid fa-magnifying-glass"></i>
                                 </span>
                                 <input type="text" placeholder="Título, autor, ISBN, código" value={search} onChange={handleSearchChange}/>
-                                <button type="button" className="search-voice" aria-label="Busqueda por voz">
-                                    <i className="fa-solid fa-microphone" />
-                                </button>
                             </div>
                         </div>
                         
@@ -644,9 +746,14 @@ function InventarioAdmin (){
                         {/* ===== FOOTER ===== */}
                         <footer className="inventory-admin-footer">
                             <div className="inventory-admin-bulk-actions">
-                                <button type="button" className="inv-btn inv-btn--primary" onClick={() => handleBulkAction("Ajustar stock")}>
+                                <button type="button" className="inv-btn inv-btn--primary" disabled={selectedIds.length === 0} onClick={() => handleBulkAction("Ajustar stock")}>
                                     <i className="fa-solid fa-sliders" />
                                     <span>Ajustar stock</span>
+                                </button>
+
+                                <button type="button" className="inv-btn inv-btn--danger" disabled={selectedIds.length === 0} onClick={() => handleBulkAction("Eliminar seleccionados")}>
+                                    <i className="fa-solid fa-trash" />
+                                    <span>Eliminar seleccionados</span>
                                 </button>
                             </div>
                         </footer>

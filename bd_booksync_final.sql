@@ -84,7 +84,7 @@ CREATE TABLE `libro` (
   `title` varchar(200) DEFAULT NULL,
   `author` varchar(200) DEFAULT NULL,
   `genre` varchar(100) DEFAULT NULL,
-  `publication_year` year DEFAULT NULL,
+  `publication_year` smallint DEFAULT NULL,
   `available_quantity` int unsigned DEFAULT NULL,
   `isbn` varchar(20) DEFAULT NULL,
   `status` enum('disponible','prestado','dañado','inactivo') DEFAULT NULL,

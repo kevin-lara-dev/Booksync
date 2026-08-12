@@ -97,6 +97,11 @@
   box-shadow: none;
 }
 
+.inv-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 /* Variantes */
 
 .inv-btn--primary {
@@ -116,6 +121,17 @@
 
 .inv-btn--ghost:hover {
   background: rgba(236, 195, 99, 0.25);
+}
+
+.inv-btn--danger {
+  background: #b31313;
+  color: #ffffff;
+  border-color: #5c0505;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+}
+
+.inv-btn--danger:hover:not(:disabled) {
+  background: #931010;
 }
 
 
@@ -152,15 +168,6 @@
   font-size: 0.9rem;
   padding: 10px 0;
   outline: none;
-}
-
-.inventory-admin-search .search-voice {
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-size: 0.95rem;
-  padding-left: 10px;
-  color: #4a3a1e;
 }
 
 /* ===== FILTROS ===== */

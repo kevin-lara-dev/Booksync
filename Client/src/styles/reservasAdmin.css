@@ -158,15 +158,6 @@
   outline: none;
 }
 
-.reservas-admin-search .search-voice {
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-size: 0.95rem;
-  padding-left: 10px;
-  color: #4a3a1e;
-}
-
 /* ===== FILTROS ===== */
 
 .reservas-admin-filters-row {

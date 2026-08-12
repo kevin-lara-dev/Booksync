@@ -87,10 +87,10 @@ class User {
     return result.affectedRows > 0;
   }
 
-  // Cuenta cuántos administradores hay en el sistema.
-  // Se usa antes de cambiar el rol de alguien para evitar quedar sin ningún administrador.
+  // Cuenta cuántos administradores ACTIVOS hay en el sistema (no cuenta los inactivos).
+  // Se usa antes de cambiar el rol o el estado de alguien, para evitar quedar sin ningún administrador activo.
   static async countAdmins() {
-    const sql = `SELECT COUNT(*) AS total FROM usuario WHERE tipo = 'administrador'`;
+    const sql = `SELECT COUNT(*) AS total FROM usuario WHERE tipo = 'administrador' AND estado = 'activo'`;
     const [rows] = await pool.query(sql);
     return rows[0].total;
   }

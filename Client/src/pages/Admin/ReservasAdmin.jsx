@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import Sidebar from "../../components/sidebar";
 import { useLogoutToast } from "../../hooks/useLogoutToast";
 import { useToast } from "../../hooks/useToast";
@@ -28,7 +28,7 @@ function ReservasAdmin() {
   const { toast: logoutToast, openToast } = useLogoutToast();
   const { toast: feedbackToast, showToast } = useToast();
 
-  const cargarReservas = async () => {
+  const cargarReservas = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getReservasAdmin();
@@ -41,11 +41,11 @@ function ReservasAdmin() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
 
   useEffect(() => {
     cargarReservas();
-  }, []);
+  }, [cargarReservas]);
 
   useEffect(() => {
     setPaginaActual(1);
@@ -387,13 +387,6 @@ function ReservasAdmin() {
                   value={search}
                   onChange={handleSearchChange}
                 />
-                <button
-                  type="button"
-                  className="search-voice"
-                  aria-label="Búsqueda por voz"
-                >
-                  <i className="fa-solid fa-microphone" />
-                </button>
               </div>
             </div>
 

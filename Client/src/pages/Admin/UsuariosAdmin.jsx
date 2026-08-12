@@ -31,7 +31,7 @@ function UsuariosAdmin() {
       setError(null);
       const data = await getAllUsers();
       setUsers(Array.isArray(data) ? data : []);
-    } catch (err) {
+    } catch {
       setError("No se pudieron cargar los usuarios.");
     } finally {
       setLoading(false);
@@ -53,23 +53,26 @@ function UsuariosAdmin() {
           u.id_usuario === user.id_usuario ? { ...u, estado: nuevoEstado } : u,
         ),
       );
-    } catch (err) {
+    } catch {
       showToast("Error", "Error al cambiar estado del usuario.");
     } finally {
       setActionLoading(null);
     }
   };
 
-  // Pide confirmación antes de cambiar el rol del usuario entre "usuario" y "administrador"
+  // Pide el rol destino (usuario, bibliotecario o administrador) y lo aplica
   const handleChangeRole = async (user) => {
-    const nuevoRol = user.tipo === "usuario" ? "administrador" : "usuario";
-
-    const { isConfirmed } = await Swal.fire({
-      title: "¿Cambiar rol?",
-      text: `${user.nombre} pasará a ser "${nuevoRol}".`,
-      icon: "warning",
+    const { value: nuevoRol } = await Swal.fire({
+      title: "Cambiar rol",
+      input: "select",
+      inputOptions: {
+        usuario: "Usuario",
+        bibliotecario: "Bibliotecario",
+        administrador: "Administrador",
+      },
+      inputValue: user.tipo,
       showCancelButton: true,
-      confirmButtonText: "Sí, cambiar",
+      confirmButtonText: "Cambiar",
       cancelButtonText: "Cancelar",
       background: "#fef6e1",
       color: "#2b1b0b",
@@ -77,7 +80,8 @@ function UsuariosAdmin() {
       cancelButtonColor: "#9e8c78",
       customClass: { popup: "swal-confirm-booksync" },
     });
-    if (!isConfirmed) return;
+
+    if (!nuevoRol || nuevoRol === user.tipo) return;
 
     setActionLoading(user.id_usuario);
     try {
@@ -88,7 +92,7 @@ function UsuariosAdmin() {
         ),
       );
       showToast("Listo", `Rol actualizado a "${nuevoRol}".`);
-    } catch (err) {
+    } catch {
       showToast("Error", "Error al cambiar rol del usuario.");
     } finally {
       setActionLoading(null);
@@ -215,6 +219,21 @@ function UsuariosAdmin() {
                   <option value="inactivo">Inactivo</option>
                 </select>
               </label>
+
+              {(search || roleFilter !== "todos" || statusFilter !== "todos") && (
+                <button
+                  type="button"
+                  className="users-chip users-chip--clear"
+                  onClick={() => {
+                    setSearch("");
+                    setRoleFilter("todos");
+                    setStatusFilter("todos");
+                  }}
+                >
+                  <i className="fa-solid fa-xmark" />
+                  <span>Limpiar</span>
+                </button>
+              )}
             </div>
 
             {/* Estados de carga y error */}

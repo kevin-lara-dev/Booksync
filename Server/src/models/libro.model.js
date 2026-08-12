@@ -9,6 +9,48 @@ const pool = require ("../config/db")
 
 class Libro {
 
+    // Inserta un libro nuevo, o si ya existe un libro inactivo (eliminado) con ese mismo ISBN,
+    // revive esa fila en vez de insertar una nueva. la fila también conserva el historial de
+    // préstamos/reservas que ya apuntaban a ese id_libro. La usan create() y bulkCreate().
+    static async _insertOrRevive({
+        title,
+        author,
+        genre,
+        publication_year,
+        available_quantity,
+        location,
+        isbn,
+        cover,
+        editorial,
+        description
+    }){
+        const [existing] = await pool.query(
+            `SELECT id_libro FROM libro WHERE isbn = ? AND status = 'inactivo'`,
+            [isbn]
+        );
+
+        if (existing.length > 0) {
+            const idLibro = existing[0].id_libro;
+            const updateSql = `
+            UPDATE libro
+            SET title = ?, author = ?, genre = ?, publication_year = ?, available_quantity = ?,
+                location = ?, status = 'disponible', cover = ?, editorial = ?, description = ?
+            WHERE id_libro = ?
+            `;
+            await pool.query(updateSql, [title, author, genre, publication_year, available_quantity, location, cover, editorial, description, idLibro]);
+            return idLibro;
+        }
+
+        const sql = `
+        INSERT INTO libro
+        (title, author, genre, publication_year, available_quantity, location, isbn, status, cover, editorial, description)
+        VALUES (?,?,?,?,?,?,?,'disponible',?,?,?)
+        `;
+
+        const [result] = await pool.query(sql, [title, author, genre, publication_year, available_quantity, location, isbn, cover, editorial, description]);
+        return result.insertId
+    };
+
     // Inserta un nuevo libro con estado "disponible" por defecto
     static async create({
         title,
@@ -22,14 +64,7 @@ class Libro {
         editorial,
         description
     }){
-        const sql = `
-        INSERT INTO libro
-        (title, author, genre, publication_year, available_quantity, location, isbn, status, cover, editorial, description)
-        VALUES (?,?,?,?,?,?,?,'disponible',?,?,?)
-        `;
-
-        const [result] = await pool.query(sql, [title, author, genre, publication_year, available_quantity, location, isbn, cover, editorial, description]);
-        return result.insertId
+        return await Libro._insertOrRevive({ title, author, genre, publication_year, available_quantity, location, isbn, cover, editorial, description });
     };
 
     // Devuelve todos los libros activos aplicando los filtros y el orden que lleguen
@@ -51,6 +86,15 @@ class Libro {
         `;
 
         const values = [];
+
+        // Búsqueda general: coincide si el texto aparece en título, autor o ISBN (OR, no AND).
+        // La usa la barra de búsqueda del Home. Los filtros de abajo (title, author, isbn) son
+        // exactos e independientes, pensados para un filtro avanzado futuro.
+        if(filters.search){
+            sql += ` AND (title LIKE ? OR author LIKE ? OR isbn LIKE ?)`
+            const term = `%${filters.search}%`;
+            values.push(term, term, term);
+        }
 
         if(filters.title){
             sql += ` AND title LIKE ?`
@@ -187,23 +231,18 @@ class Libro {
 
         for (const book of books) {
             try {
-                const sql = `
-                    INSERT INTO libro
-                    (title, author, genre, publication_year, available_quantity, location, isbn, status, cover, editorial, description)
-                    VALUES (?,?,?,?,?,?,?,'disponible',?,?,?)
-                `;
-                await pool.query(sql, [
-                    book.title,
-                    book.author,
-                    book.genre         || "",
-                    book.publication_year || null,
-                    book.available_quantity || 0,
-                    book.location      || "",
-                    book.isbn,
-                    book.cover         || "",
-                    book.editorial     || "",
-                    book.description   || "",
-                ]);
+                await Libro._insertOrRevive({
+                    title: book.title,
+                    author: book.author,
+                    genre: book.genre         || "",
+                    publication_year: book.publication_year || null,
+                    available_quantity: book.available_quantity || 0,
+                    location: book.location      || "",
+                    isbn: book.isbn,
+                    cover: book.cover         || "",
+                    editorial: book.editorial     || "",
+                    description: book.description   || "",
+                });
                 results.created++;
             } catch (error) {
                 // ER_DUP_ENTRY indica ISBN duplicado. Se reporta el error pero se continúa con el resto del lote.

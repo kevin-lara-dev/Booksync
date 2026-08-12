@@ -80,15 +80,6 @@
     outline: none;
   }
   
-  .users-admin-search .search-voice {
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    font-size: 0.95rem;
-    padding-left: 10px;
-    color: #4a3a1e;
-  }
-  
   /* Filtros */
   .users-admin-filters-row {
     display: flex;
@@ -128,7 +119,21 @@
     font-size: 0.75rem;
     color: #1a1a1a;
   }
-  
+
+  .users-chip--clear {
+    background: linear-gradient(135deg, #f7e4b6, #e2c27a);
+    border: none;
+  }
+
+  .users-chip--clear:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35);
+  }
+
+  .users-chip--clear:active {
+    transform: scale(0.95);
+  }
+
   /* Grid de tarjetas */
   .users-admin-grid {
     display: flex;

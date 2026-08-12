@@ -175,6 +175,11 @@
   display: none;
 }
 
+/* Si el toast de favoritos y el de reserva coinciden en pantalla, que no se tapen entre sí */
+.detalle-page .reserve-toast.fav-toast {
+  bottom: 110px;
+}
+
 .detalle-page .reserve-toast .toast-content {
   display: flex;
   align-items: center;

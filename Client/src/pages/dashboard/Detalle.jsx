@@ -246,7 +246,7 @@ function Detalle() {
         </div>
 
         <div
-          className={"reserve-toast" + (showFavToast ? "" : " hidden")}
+          className={"reserve-toast fav-toast" + (showFavToast ? "" : " hidden")}
           role="status"
           aria-live="polite"
         >

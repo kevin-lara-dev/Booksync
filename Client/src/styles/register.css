@@ -202,15 +202,16 @@
   }
   
 
-  .register-page .form-row .field input[type="password"] {
+  .register-page .form-row .field input[type="password"],
+  .register-page .form-row .field input[type="text"] {
     flex: 1;
     border: 0;
     background: transparent;
     padding: 10px 0;
     font-size: 15px;
     color: #1b1714;
-    padding-right: 38px;   
-    border-radius: 0;     
+    padding-right: 38px;
+    border-radius: 0;
   }
   
   

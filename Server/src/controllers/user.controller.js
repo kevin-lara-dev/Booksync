@@ -82,6 +82,17 @@ class UserController {
         return res.status(400).json({ message: "El estado es obligatorio" });
       }
 
+      // Si se va a desactivar a un administrador, se verifica que quede al menos otro administrador activo
+      if (estado === "inactivo") {
+        const targetUser = await User.findById(id);
+        if (targetUser?.tipo === "administrador") {
+          const totalAdmins = await User.countAdmins();
+          if (totalAdmins <= 1) {
+            return res.status(400).json({ message: "Debe haber al menos un administrador activo en el sistema" });
+          }
+        }
+      }
+
       const updated = await User.updateStatus(id, estado);
 
       if (!updated) {
@@ -159,7 +170,9 @@ class UserController {
       // Se verifica que el usuario conozca su contraseña actual antes de permitir el cambio
       const isMatch = await bcrypt.compare(passwordActual, user.password_hash);
       if (!isMatch) {
-        return res.status(401).json({ message: "La contraseña actual es incorrecta" });
+        // 403, no 401: el usuario SÍ está autenticado, solo no acertó la contraseña actual.
+        // Un 401 aquí dispararía el interceptor global de axios que asume sesión expirada y desloguea.
+        return res.status(403).json({ message: "La contraseña actual es incorrecta" });
       }
 
       const newHashedPassword = await bcrypt.hash(passwordNueva, 10);

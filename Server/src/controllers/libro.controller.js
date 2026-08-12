@@ -49,6 +49,7 @@ class LibroController {
     try {
       // Los filtros son opcionales; si no se envían, findAll devuelve todos los libros
       const filters = {
+        search: req.query.search,
         title: req.query.title,
         author: req.query.author,
         isbn: req.query.isbn,

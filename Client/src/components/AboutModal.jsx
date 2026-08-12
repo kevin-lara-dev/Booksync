@@ -7,7 +7,7 @@ export default function AboutModal({ open, onOpenChange }) {
       <Dialog.Portal>
         <Dialog.Overlay className="modal-overlay" />
         <Dialog.Content className="modal-content about-modal-content">
-          <Dialog.Title className="modal-title">Sobre mí</Dialog.Title>
+          <Dialog.Title className="modal-title">Sobre el desarrollador</Dialog.Title>
 
           <div className="about-body">
             <div className="about-header">

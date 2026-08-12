@@ -32,7 +32,7 @@ function Home() {
   const fetchLibros = useCallback(async (search = "") => {
     try {
       const data = await getLibrosRequest({
-        title: search,
+        search: search,
         genre: selectedGenre,
         sort: sortField,
         order: sortOrder,

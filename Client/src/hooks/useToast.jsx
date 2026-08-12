@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 // Hook para mostrar notificaciones (toasts) de feedback al usuario. Se usa en casi todas las páginas.
 // Uso: const { toast, showToast } = useToast()
@@ -7,14 +7,16 @@ import { useState } from "react";
 export function useToast() {
   const [state, setState] = useState({ show: false, title: "", msg: "" });
 
-  // Muestra el toast y lo oculta automáticamente después de 3 segundos
-  const showToast = (title, msg) => {
+  // Muestra el toast y lo oculta automáticamente después de 3 segundos.
+  // useCallback para que mantenga la misma identidad entre renders: algunas páginas
+  // la usan dentro de un useEffect y sin esto el efecto se dispararía en cada render.
+  const showToast = useCallback((title, msg) => {
     setState({ show: true, title, msg });
     setTimeout(() => setState({ show: false, title: "", msg: "" }), 3000);
-  };
+  }, []);
 
   // Cierre manual cuando el usuario toca la X
-  const dismiss = () => setState({ show: false, title: "", msg: "" });
+  const dismiss = useCallback(() => setState({ show: false, title: "", msg: "" }), []);
 
   // Si el título es "Error" muestra ✗ roja, en cualquier otro caso muestra ✓ verde
   const isError = state.title === "Error";
