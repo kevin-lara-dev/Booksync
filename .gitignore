@@ -7,3 +7,11 @@ Server/dist
 Server/.env
 Client/.env
 .env
+
+# Artefactos de pruebas (se regeneran solos en cada corrida)
+Client/playwright-report/
+Client/test-results/
+Client/*.png
+
+# Copia de entrega para el SENA (no forma parte del repo)
+proyecto_booksync/

@@ -337,6 +337,14 @@ input[type="password"] {
   text-align: center;
 }
 
+.manuals-credentials p {
+  margin: 0 0 4px;
+}
+
+.manuals-credentials p:last-child {
+  margin-bottom: 0;
+}
+
 .manuals-credentials strong {
   color: #f7d470;
 }

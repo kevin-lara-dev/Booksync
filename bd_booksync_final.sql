@@ -32,7 +32,7 @@ CREATE TABLE `favorito` (
   KEY `fk_favorito_libro` (`id_libro`),
   CONSTRAINT `fk_favorito_libro` FOREIGN KEY (`id_libro`) REFERENCES `libro` (`id_libro`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_favorito_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -41,7 +41,6 @@ CREATE TABLE `favorito` (
 
 LOCK TABLES `favorito` WRITE;
 /*!40000 ALTER TABLE `favorito` DISABLE KEYS */;
-INSERT INTO `favorito` VALUES (3,3,6,'2026-05-27 16:45:52');
 /*!40000 ALTER TABLE `favorito` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -161,7 +160,7 @@ CREATE TABLE `prestamo` (
   CONSTRAINT `fk_prestamo_reserva` FOREIGN KEY (`id_reserva`) REFERENCES `reserva` (`id_reserva`),
   CONSTRAINT `fk_prestamo_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `ck_prestamo_fechas` CHECK (((`fecha_devolucion` is null) or (`fecha_devolucion` >= `fecha_prestamo`)))
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -170,7 +169,6 @@ CREATE TABLE `prestamo` (
 
 LOCK TABLES `prestamo` WRITE;
 /*!40000 ALTER TABLE `prestamo` DISABLE KEYS */;
-INSERT INTO `prestamo` VALUES (1,6,3,21,'2026-05-26 19:17:21','2026-06-02 19:17:21','devuelto','2026-05-26 19:18:27'),(2,8,3,6,'2026-05-27 11:47:09','2026-06-03 11:47:09','devuelto','2026-05-27 11:47:58'),(3,9,3,7,'2026-06-03 11:18:46','2026-06-10 11:18:46','devuelto','2026-06-03 11:19:29');
 /*!40000 ALTER TABLE `prestamo` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -226,7 +224,7 @@ CREATE TABLE `reserva` (
   KEY `idx_reserva_libro` (`id_libro`),
   CONSTRAINT `fk_reserva_libro` FOREIGN KEY (`id_libro`) REFERENCES `libro` (`id_libro`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_reserva_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -235,7 +233,6 @@ CREATE TABLE `reserva` (
 
 LOCK TABLES `reserva` WRITE;
 /*!40000 ALTER TABLE `reserva` DISABLE KEYS */;
-INSERT INTO `reserva` VALUES (1,3,21,'2026-05-08 16:31:16','2026-05-10 00:31:16',NULL,'2026-05-08 16:47:59','cancelada'),(2,3,5,'2026-05-08 16:53:18','2026-05-10 00:53:18','2026-05-08 16:53:43',NULL,'confirmada'),(3,3,21,'2026-05-09 08:34:18','2026-05-10 16:34:18',NULL,'2026-05-09 08:35:14','cancelada'),(4,3,21,'2026-05-11 15:52:28','2026-05-12 23:52:28',NULL,'2026-05-11 15:53:35','cancelada'),(5,3,21,'2026-05-11 16:24:08','2026-05-13 00:24:08',NULL,'2026-05-11 16:24:12','cancelada'),(6,3,21,'2026-05-11 23:20:18','2026-05-13 07:20:18','2026-05-11 23:22:15',NULL,'prestada'),(7,3,6,'2026-05-26 19:16:46','2026-05-28 03:16:46',NULL,'2026-05-27 11:45:32','cancelada'),(8,3,6,'2026-05-27 11:45:53','2026-05-28 19:45:53','2026-05-27 11:47:04',NULL,'prestada'),(9,3,7,'2026-05-29 18:36:49','2026-05-31 02:36:49','2026-05-29 18:37:56',NULL,'prestada');
 /*!40000 ALTER TABLE `reserva` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -256,7 +253,7 @@ CREATE TABLE `reset_token` (
   UNIQUE KEY `uq_token` (`token`),
   KEY `fk_reset_token_usuario` (`id_usuario`),
   CONSTRAINT `fk_reset_token_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -265,7 +262,6 @@ CREATE TABLE `reset_token` (
 
 LOCK TABLES `reset_token` WRITE;
 /*!40000 ALTER TABLE `reset_token` DISABLE KEYS */;
-INSERT INTO `reset_token` VALUES (3,19,'4fe5a741e426d8297b8e4fc2f0189675dced4a64fc7d54b1892b022cba19c3c3','2026-06-29 01:33:40','2026-06-29 05:33:39'),(4,19,'2334d58d21a4d8a0db7c29afd4ac6ad7fc3b28a26d6608f29dc0e143eaeaec6e','2026-06-29 01:34:07','2026-06-29 05:34:07'),(6,19,'4bd65c762906f4b157f67f22e14802ff13d002f608866713aa5388da714c9cd6','2026-06-29 01:49:45','2026-06-29 05:49:44');
 /*!40000 ALTER TABLE `reset_token` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -316,7 +312,7 @@ CREATE TABLE `usuario` (
   `fecha_nacimiento` date DEFAULT NULL,
   PRIMARY KEY (`id_usuario`),
   UNIQUE KEY `correo` (`correo`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -325,7 +321,7 @@ CREATE TABLE `usuario` (
 
 LOCK TABLES `usuario` WRITE;
 /*!40000 ALTER TABLE `usuario` DISABLE KEYS */;
-INSERT INTO `usuario` VALUES (3,'kevin','kevin@booksync.com','$2b$10$uqyNaA4u6loWe/KzCs.BCuXDS5a5UaXxarYgHoCbWNt8/jmqpHdpW','administrador','activo','Lara','CC','10700045555','2004-06-27'),(16,'Juan','juan@email.com','$2b$10$phiq74.WoO/3p3dMM6ZWb.rlQVorvevixlLzt3Dr5sIJDH.vEZSLG','usuario','inactivo','García','CC','1234567890','2000-05-15'),(17,'juanito','juanito@gmail.com','$2b$10$JFjAGFeQPX85ki2zPLbNuOljk9WGKDB4Ia6capEQsYdUzQEIHw9Zy','usuario','inactivo','perez','CC','123456789','2002-06-05'),(18,'juanita','lol@gmail.com','$2b$10$NlKt578wGV2Wo1JCifoexuop/yL51QKg3uCAEzRWVYWIvDLjf.ADu','usuario','inactivo','perez','CC','1070004611','2026-05-01'),(19,'test','kevinesteven0627@gmail.com','$2b$10$LHvE6VbHoaE9YxlknI5xyOEngDY/MSOYxzFBuXSm8LTRcOnZHGsIa','usuario','activo','mento','CC','0000000000000000','2026-05-11');
+INSERT INTO `usuario` VALUES (1,'kevin','kevin@booksync.com','$2b$10$uqyNaA4u6loWe/KzCs.BCuXDS5a5UaXxarYgHoCbWNt8/jmqpHdpW','administrador','activo','Lara','CC','1000000001','2000-01-01'),(2,'usuario','usuario@booksync.com','$2b$10$uqyNaA4u6loWe/KzCs.BCuXDS5a5UaXxarYgHoCbWNt8/jmqpHdpW','usuario','activo','Demo','CC','1000000002','2000-01-01'),(3,'bibliotecario','bibliotecario@booksync.com','$2b$10$uqyNaA4u6loWe/KzCs.BCuXDS5a5UaXxarYgHoCbWNt8/jmqpHdpW','bibliotecario','activo','Demo','CC','1000000003','2000-01-01');
 /*!40000 ALTER TABLE `usuario` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

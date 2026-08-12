@@ -87,9 +87,17 @@ function Login() {
                   ))}
                 </ul>
 
-                <p className="manuals-credentials">
-                  Usuario de prueba: <strong>kevin@booksync.com</strong> · Clave: <strong>123456</strong>
-                </p>
+                <div className="manuals-credentials">
+                  <p>
+                    Administrador: <strong>kevin@booksync.com</strong> · Clave: <strong>123456</strong>
+                  </p>
+                  <p>
+                    Usuario: <strong>usuario@booksync.com</strong> · Clave: <strong>123456</strong>
+                  </p>
+                  <p>
+                    Bibliotecario: <strong>bibliotecario@booksync.com</strong> · Clave: <strong>123456</strong>
+                  </p>
+                </div>
               </div>
             )}
           </div>

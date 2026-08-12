@@ -31,9 +31,9 @@ test("Usuario normal no ve opciones de admin", async ({ page }) => {
 
   await page.fill(
     'input[placeholder="Escriba su correo"]',
-    "lolamento@booksync.com",
+    "kevinesteven0627@gmail.com",
   );
-  await page.fill('input[placeholder="Escriba su contraseña"]', "123456");
+  await page.fill('input[placeholder="Escriba su contraseña"]', "123456789");
   await page.click("button.btn-login");
 
   await page.waitForURL("**/Home", { timeout: 8000 });
