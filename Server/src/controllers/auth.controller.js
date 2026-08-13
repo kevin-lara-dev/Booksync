@@ -142,6 +142,8 @@ class AuthController {
       });
 
     } catch (error) {
+      // Se loguea el error real (ej. fallo de autenticación con Gmail) para poder diagnosticarlo desde los logs de Render
+      console.error("error en forgotPassword:", error.message);
       return res.status(500).json({ message: "Error al procesar la solicitud" });
     }
   }
