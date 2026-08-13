@@ -25,7 +25,9 @@ const Help = () => {
         showToast("Listo", "Mensaje enviado con éxito");
         form.current.reset();
       })
-      .catch(() => {
+      .catch((error) => {
+        // Se loguea el error real de EmailJS (ej. servicio desconectado) para poder diagnosticarlo
+        console.error("error al enviar el mensaje de ayuda:", error);
         showToast("Error", "No se pudo enviar el mensaje");
       });
   };

@@ -71,8 +71,8 @@ function Reset() {
           <header className="reset-header">
             <h1>Crear una nueva contraseña</h1>
             <p>
-              Al finalizar este paso automáticamente <br />
-              ingresarás a BookSync
+              Al finalizar este paso, inicia sesión <br />
+              con tu nueva contraseña
             </p>
           </header>
 
