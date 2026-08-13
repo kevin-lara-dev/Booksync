@@ -18,7 +18,9 @@ const initialFormState = {
     available_quantity: 0,
     location: "",
     status: "disponible",
-    cover: ""
+    cover: "",
+    editorial: "",
+    description: ""
 }
 
 
@@ -45,7 +47,9 @@ function InventarioAdmin (){
         available_quantity: 0,
         location: "",
         status: "disponible",
-        cover: ""
+        cover: "",
+        editorial: "",
+        description: ""
     })
 
     // Configuración de paginación: número de libros por página y página activa
@@ -183,7 +187,9 @@ function InventarioAdmin (){
             available_quantity: book.available_quantity,
             location: book.location,
             status: book.status,
-            cover: book.cover || ""
+            cover: book.cover || "",
+            editorial: book.editorial || "",
+            description: book.description || ""
         });
 
         setShowForm(true);
