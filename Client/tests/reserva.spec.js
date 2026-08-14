@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test } from "@playwright/test";
 
 test("Flujo completo de reserva", async ({ page }) => {
   // 1. Login

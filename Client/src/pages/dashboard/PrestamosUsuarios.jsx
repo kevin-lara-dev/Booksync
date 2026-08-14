@@ -26,7 +26,7 @@ function PrestamosUsuarios() {
     };
 
     fetchPrestamos();
-  }, []);
+  }, [showToast]);
 
   const formatDate = (dateString) => {
     if (!dateString) return "No disponible";

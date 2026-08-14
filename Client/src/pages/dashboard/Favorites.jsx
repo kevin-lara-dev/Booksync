@@ -60,7 +60,7 @@ function Favorites() {
         const data = await getFavorites();
 
         setFavorites(data.favorite || []);
-      } catch (error) {
+      } catch {
         setFavorites([]);
       } finally {
         setLoading(false);

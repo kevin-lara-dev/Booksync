@@ -57,6 +57,7 @@ export function AuthProvider({ children }) {
 }
 
 // Hook para consumir el contexto de autenticación desde cualquier componente. Lanza un error si se usa fuera del AuthProvider.
+// eslint-disable-next-line react-refresh/only-export-components -- el hook vive junto a su Provider a propósito, es el patrón estándar de contexto
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) {

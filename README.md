@@ -48,20 +48,23 @@ BookSync es una aplicación web fullstack para la gestión operativa de una bibl
 - Lista de favoritos con opción de reservar directamente
 - Gestión de cuenta: editar perfil, cambiar contraseña, desactivar cuenta
 
-### Administrador
+### Administrador y bibliotecario
 
-- Inventario de libros: crear, editar, eliminar con subida de portada
-- Gestión de reservas: confirmar o rechazar con devolución automática de stock
-- Gestión de préstamos: registrar préstamo desde reserva confirmada, registrar devolución
-- Gestión de usuarios: cambiar rol, activar/desactivar
+BookSync distingue dos niveles de acceso además de usuario: **administrador** (gestión completa) y **bibliotecario** (operación diaria). Ambos comparten reservas y préstamos; inventario y usuarios son exclusivos de administrador.
+
+- Inventario de libros: crear, editar, eliminar con subida de portada, importar por CSV, acciones masivas (ajustar stock, eliminar seleccionados) — **solo administrador**
+- Gestión de reservas: confirmar o rechazar con devolución automática de stock — administrador y bibliotecario
+- Gestión de préstamos: registrar préstamo desde reserva confirmada, registrar devolución — administrador y bibliotecario
+- Gestión de usuarios: cambiar rol, activar/desactivar (con protección para no quedar sin administrador activo) — **solo administrador**
 - Filtros por estado, usuario y fecha en todos los paneles admin
 
 ### Seguridad
 
 - Rutas protegidas con `PrivateRoute` (usuario) y `AdminRoute` (admin) en el frontend
-- Middleware de autenticación JWT y verificación de rol en el backend
+- Middleware de autenticación JWT y verificación de rol en el backend (`isAdmin` / `isStaff`)
 - Logout automático al expirar el token (interceptor axios)
 - Expiración automática de reservas no confirmadas
+- Recuperación de contraseña por correo con token de un solo uso (Nodemailer)
 
 ---
 
@@ -112,21 +115,12 @@ cd Server
 npm install
 ```
 
-Creá un archivo `.env` en `/Server`:
-
-```env
-PORT=3000
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=tu_password
-DB_NAME=booksync
-JWT_SECRET=tu_clave_secreta
-```
+Creá un archivo `.env` en `/Server` usando `Server/.env.example` como referencia. Las variables `PORT`, `DB_*` y `JWT_*` son obligatorias para que el backend arranque; `EMAIL_*`, `FRONTEND_URL` y `R2_*` son opcionales y solo afectan la recuperación de contraseña por correo y la subida de portadas — sin ellas, el resto de la app funciona con normalidad.
 
 Importá el esquema de base de datos:
 
 ```bash
-mysql -u root -p booksync < booksync.sql
+mysql -u root -p booksync < bd_booksync_final.sql
 ```
 
 Iniciá el servidor:
@@ -149,54 +143,73 @@ npm run dev
 
 ## 🔌 API — Endpoints principales
 
-### Auth
+Todas las rutas cuelgan del prefijo `/api`.
 
-| Método | Ruta             | Descripción       |
-| ------ | ---------------- | ----------------- |
-| POST   | `/auth/login`    | Iniciar sesión    |
-| POST   | `/auth/register` | Registrar usuario |
+### Auth (`/api/auth`)
 
-### Usuarios
+| Método | Ruta                       | Acceso  | Descripción                              |
+| ------ | -------------------------- | ------- | ----------------------------------------- |
+| POST   | `/register`                | Pública | Registrar usuario                          |
+| POST   | `/login`                   | Pública | Iniciar sesión                             |
+| POST   | `/forgot-password`         | Pública | Solicitar recuperación de contraseña       |
+| POST   | `/reset-password/:token`   | Pública | Cambiar contraseña con el token del correo |
 
-| Método | Ruta                      | Acceso      |
-| ------ | ------------------------- | ----------- |
-| GET    | `/users/profile`          | Autenticado |
-| PUT    | `/users/profile`          | Autenticado |
-| PATCH  | `/users/profile/password` | Autenticado |
-| DELETE | `/users/profile`          | Autenticado |
-| GET    | `/users`                  | Admin       |
-| PATCH  | `/users/:id/role`         | Admin       |
-| PATCH  | `/users/:id/status`       | Admin       |
+### Usuarios (`/api/users`)
 
-### Libros
+| Método | Ruta                      | Acceso      | Descripción                  |
+| ------ | ------------------------- | ----------- | ----------------------------- |
+| GET    | `/profile`                | Autenticado | Ver mi perfil                 |
+| PUT    | `/profile`                | Autenticado | Actualizar mis datos          |
+| PATCH  | `/profile/password`       | Autenticado | Cambiar mi contraseña         |
+| DELETE | `/profile`                | Autenticado | Desactivar mi cuenta          |
+| GET    | `/`                       | Admin       | Listar todos los usuarios     |
+| PATCH  | `/:id/role`                | Admin       | Cambiar rol de un usuario     |
+| PATCH  | `/:id/status`               | Admin       | Activar/desactivar un usuario |
 
-| Método | Ruta          | Acceso  |
-| ------ | ------------- | ------- |
-| GET    | `/libros`     | Público |
-| GET    | `/libros/:id` | Público |
-| POST   | `/libros`     | Admin   |
-| PUT    | `/libros/:id` | Admin   |
-| DELETE | `/libros/:id` | Admin   |
+### Libros (`/api/libros`)
 
-### Reservas
+| Método | Ruta            | Acceso      | Descripción                          |
+| ------ | --------------- | ----------- | -------------------------------------- |
+| GET    | `/`             | Autenticado | Listar libros (con filtros)            |
+| GET    | `/genres`       | Autenticado | Géneros distintos                      |
+| GET    | `/recomendados` | Autenticado | Libros más prestados (carrusel Home)   |
+| GET    | `/:id`          | Autenticado | Detalle de un libro                    |
+| POST   | `/`             | Admin       | Crear libro                            |
+| POST   | `/import`       | Admin       | Importar libros desde CSV              |
+| POST   | `/upload-cover` | Admin       | Subir portada a Cloudflare R2          |
+| PUT    | `/:id`          | Admin       | Actualizar libro                       |
+| DELETE | `/:id`          | Admin       | Eliminar libro (soft delete)           |
 
-| Método | Ruta                            | Acceso  |
-| ------ | ------------------------------- | ------- |
-| POST   | `/reservas`                     | Usuario |
-| GET    | `/reservas/mis`                 | Usuario |
-| PATCH  | `/reservas/:id/cancelar`        | Usuario |
-| GET    | `/admin/reservas`               | Admin   |
-| PATCH  | `/admin/reservas/:id/confirmar` | Admin   |
-| PATCH  | `/admin/reservas/:id/cancelar`  | Admin   |
+### Favoritos (`/api/favorite`)
 
-### Préstamos
+| Método | Ruta        | Acceso      | Descripción                          |
+| ------ | ----------- | ----------- | -------------------------------------- |
+| GET    | `/`         | Autenticado | Mis favoritos                          |
+| GET    | `/ids`      | Autenticado | IDs de mis favoritos                   |
+| GET    | `/:idLibro` | Autenticado | Verificar si un libro es favorito      |
+| POST   | `/:idLibro` | Autenticado | Agregar a favoritos                    |
+| DELETE | `/:idLibro` | Autenticado | Quitar de favoritos                    |
 
-| Método | Ruta                      | Acceso  |
-| ------ | ------------------------- | ------- |
-| POST   | `/prestamos`              | Admin   |
-| GET    | `/prestamos/mis`          | Usuario |
-| GET    | `/admin/prestamos`        | Admin   |
-| PATCH  | `/prestamos/:id/devolver` | Admin   |
+### Reservas (`/api/reservas`)
+
+| Método | Ruta                              | Acceso                    | Descripción                        |
+| ------ | ---------------------------------- | -------------------------- | ------------------------------------ |
+| GET    | `/mis`                              | Autenticado                 | Mis reservas                         |
+| POST   | `/:idLibro`                         | Autenticado                 | Crear reserva                        |
+| DELETE | `/:idReserva`                       | Autenticado                 | Cancelar mi reserva                  |
+| GET    | `/admin`                            | Admin / bibliotecario       | Listar todas las reservas            |
+| POST   | `/admin`                            | Admin / bibliotecario       | Crear reserva a nombre de un usuario |
+| PATCH  | `/admin/:idReserva/confirmar`       | Admin / bibliotecario       | Confirmar reserva                    |
+| PATCH  | `/admin/:idReserva/cancelar`        | Admin / bibliotecario       | Cancelar reserva                     |
+
+### Préstamos (`/api/prestamos`)
+
+| Método | Ruta                     | Acceso                | Descripción                          |
+| ------ | ------------------------ | ---------------------- | -------------------------------------- |
+| GET    | `/MisPrestamos`           | Autenticado             | Mis préstamos                          |
+| POST   | `/reserva/:idReserva`     | Admin / bibliotecario   | Registrar préstamo desde una reserva   |
+| PATCH  | `/devolver/:idPrestamo`   | Admin / bibliotecario   | Registrar devolución                   |
+| GET    | `/list`                   | Admin / bibliotecario   | Listar todos los préstamos             |
 
 ---
 
@@ -211,9 +224,7 @@ npm run dev
 
 ## 📌 Estado del proyecto
 
-MVP completado. Funcionalidades previstas para versiones futuras:
+Proyecto completado como trabajo de grado (SENA — Tecnólogo en Análisis y Desarrollo de Software). Funcionalidades previstas para versiones futuras:
 
-- Recuperación de contraseña por email (Nodemailer)
-- Módulo de notificaciones y alertas
-- Exportación / importación de inventario en CSV o Excel
-- Acciones masivas sobre libros seleccionados
+- Módulo de notificaciones y alertas para el usuario
+- Reportes exportables (la tabla `reporte` ya existe en el esquema, pendiente de implementar en backend/frontend)

@@ -35,7 +35,7 @@ export default function NuevaReservaModal({ open, onOpenChange, onCreated }) {
                         (libro) => libro.status === "disponible" && libro.available_quantity > 0,
                     ),
                 );
-            } catch (err) {
+            } catch {
                 setError("No se pudieron cargar los usuarios y libros");
             }
         };

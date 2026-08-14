@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import Sidebar from "../../components/sidebar";
 import { useLogoutToast } from "../../hooks/useLogoutToast";
 import { useToast } from "../../hooks/useToast";
@@ -19,7 +19,7 @@ function PrestamosAdmin() {
   const { toast: logoutToast, openToast } = useLogoutToast();
   const { toast: feedbackToast, showToast } = useToast();
 
-  const cargarPrestamos = async () => {
+  const cargarPrestamos = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getPrestamosAdmin();
@@ -32,11 +32,11 @@ function PrestamosAdmin() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
 
   useEffect(() => {
     cargarPrestamos();
-  }, []);
+  }, [cargarPrestamos]);
 
   useEffect(() => {
     setPaginaActual(1);

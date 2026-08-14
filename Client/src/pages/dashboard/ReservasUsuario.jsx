@@ -46,7 +46,7 @@ function ReservasUsuario() {
           esVisibleReciente,
         );
         setReservas(reservasFiltradas);
-      } catch (error) {
+      } catch {
         setReservas([]);
       } finally {
         setLoading(false);

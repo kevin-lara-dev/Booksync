@@ -48,7 +48,8 @@ function Account() {
           tipo_documento: data.tipo_documento || "",
           numero_documento: data.numero_documento || "",
         });
-      } catch (err) {
+      } catch {
+        // si falla la carga, el formulario queda vacío y el usuario puede recargar la página
       } finally {
         setLoading(false);
       }
@@ -117,7 +118,8 @@ function Account() {
       if (result.isConfirmed) {
         try {
           await deleteProfile();
-        } catch (err) {
+        } catch {
+          // aunque falle la desactivación en el backend, se cierra la sesión igual
         } finally {
           logout();
         }

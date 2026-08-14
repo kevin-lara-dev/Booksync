@@ -7,9 +7,7 @@ import { useToast } from "../../hooks/useToast";
 const MANUALS = [
   { name: "Manual de Usuario", file: "/manuales/manual-usuario.pdf" },
   { name: "Manual Técnico de la Aplicación", file: "/manuales/manual-tecnico.pdf" },
-  { name: "Plan de Capacitación a los Usuarios", file: "/manuales/plan-capacitacion.pdf" },
   { name: "Manual de Instalación y Configuración", file: "/manuales/manual-instalacion.pdf" },
-  { name: "Plan de Validación de Características", file: "/manuales/plan-validacion.pdf" },
 ];
 
 function Login() {
